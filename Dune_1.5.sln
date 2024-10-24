@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dune 1.5", "Dune_1.5\Dune_1.5.vcxproj", "{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Debug|x64.ActiveCfg = Debug|x64
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Debug|x64.Build.0 = Debug|x64
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Debug|x86.ActiveCfg = Debug|Win32
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Debug|x86.Build.0 = Debug|Win32
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Release|x64.ActiveCfg = Release|x64
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Release|x64.Build.0 = Release|x64
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Release|x86.ActiveCfg = Release|Win32
+		{4423F3A9-6FA4-426B-AD4F-438872D6CA5A}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {34FE846B-0B36-4D09-87BD-B9E5B323A51F}
+	EndGlobalSection
+EndGlobal
