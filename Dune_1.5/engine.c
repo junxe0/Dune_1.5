@@ -46,7 +46,7 @@ int main(void) {
 	init();
 	intro();
 	display(resource, map, cursor, ob_info, system_message, command);
-	
+
 	while (1) {
 		// loop 돌 때마다(즉, TICK==10ms마다) 키 입력 확인
 		KEY key = get_key();
@@ -81,7 +81,7 @@ int main(void) {
 /* ================= subfunctions =================== */
 void intro(void) {
 	printf("20242397 류준서\n");
-	printf("DUNE 1.5\n");
+	printf("DUNE 1.5\n");		
 	POSITION pos = { 2, 8 };
 	gotoxy(pos);
 	printf("Loading...\n");
@@ -116,46 +116,6 @@ void intro(void) {
 }
 
 void outro(void) {
-	srand((unsigned int)time(NULL));
-
-	for (int i = 0; i < 10; i++) {
-		system("cls");
-		int color = rand() % 14 + 1;
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
-		for (int i = 0; i < 6; i++) {
-			POSITION pos = { 4 + i, 14 };
-			gotoxy(pos);
-			if (i == 0) { printf(" ::::::::      :::     ::::    ::::  ::::::::::  :::::::::: ::::    ::: :::::::::              \n"); }
-			else if (i == 1) { printf(":+:    :+:   :+: :+:   +:+:+: :+:+:+ :+:         :+:        :+:+:   :+: :+:    :+:             \n"); }
-			else if (i == 2) { printf(":#:        +#++:++#++: +#+  +:+  +#+ +#++:++#    +#++:++#   +#+ +:+ +#+ +#+    +:+             \n"); }
-			else if (i == 3) { printf("+#+   +#+# +#+     +#+ +#+       +#+ +#+         +#+        +#+  +#+#+# +#+    +#+             \n"); }
-			else if (i == 4) { printf("#+#    #+# #+#     #+# #+#       #+# #+#         #+#        #+#   #+#+# #+#    #+# #+# #+# #+# \n"); }
-			else if (i == 5) { printf(" ########  ###     ### ###       ### ##########  ########## ###    #### #########  ### ### ### \n"); }
-		}
-		for (int i = 0; i < 7; i++) {
-			POSITION pos = { 12 + i, 22 };
-			gotoxy(pos);
-			if (i == 0) { printf(" ::::::::  :::::::::: ::::::::::  :::   :::  ::::::::  :::    ::: \n"); }
-			else if (i == 1) { printf(":+:    :+: :+:        :+:         :+:   :+: :+:    :+: :+:    :+: \n"); }
-			else if (i == 2) { printf("+:+        +:+        +:+          +:+ +:+  +:+    +:+ +:+    +:+ \n"); }
-			else if (i == 3) { printf("+#++:++#++ +#++:++#   +#++:++#      +#++:   +#+    +:+ +#+    +:+ \n"); }
-			else if (i == 4) { printf("       +#+ +#+        +#+            +#+    +#+    +#+ +#+    +#+ \n"); }
-			else if (i == 5) { printf("#+#    #+# #+#        #+#            #+#    #+#    #+# #+#    #+# \n"); }
-			else if (i == 6) { printf(" ########  ########## ##########     ###     ########   ########  \n"); }
-		}
-		for (int i = 0; i < 7; i++) {
-			POSITION pos = { 19 + i, 8 };
-			gotoxy(pos);
-			if (i == 0) { printf("::::    ::: :::::::::: :::    ::: :::::::::::  ::::::::::: ::::::::::: ::::    ::::  :::::::::: ::: \n"); }
-			else if (i == 1) { printf(":+:+:   :+: :+:        :+:    :+:     :+:          :+:         :+:     +:+:+: :+:+:+ :+:        :+: \n"); }
-			else if (i == 2) { printf(":+:+:+  +:+ +:+         +:+  +:+      +:+          +:+         +:+     +:+ +:+:+ +:+ +:+        +:+ \n"); }
-			else if (i == 3) { printf("+#+ +:+ +#+ +#++:++#     +#++:+       +#+          +#+         +#+     +#+  +:+  +#+ +#++:++#   +#+ \n"); }
-			else if (i == 4) { printf("+#+  +#+#+# +#+         +#+  +#+      +#+          +#+         +#+     +#+       +#+ +#+        +#+ \n"); }
-			else if (i == 5) { printf("#+#   #+#+# #+#        #+#    #+#     #+#          #+#         #+#     #+#       #+# #+#            \n"); }
-			else if (i == 6) { printf("###    #### ########## ###    ###     ###          ###     ########### ###       ### ########## ### \n"); }
-		}
-		Sleep(500);
-	}
 	exit(0);
 }
 
