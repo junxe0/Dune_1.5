@@ -9,13 +9,14 @@ void init(void);
 void intro(void);
 void outro(void);
 void cursor_move(DIRECTION dir);
+void cursor_move2(DIRECTION dir);
 void sample_obj_move(void);
 POSITION sample_obj_next_position(void);
 
 
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
-CURSOR cursor = { { 1, 1 }, {1, 1} };
+CURSOR cursor = { { 1, 1 }, { 1, 1 } };
 
 
 /* ================= game data =================== */
@@ -47,16 +48,30 @@ int main(void) {
 	intro();
 	display(resource, map, cursor, ob_info, system_message, command);
 
+	KEY press_key = 0;
+	int press_count = 0;
+	int last_sys_clock = 0;
+
 	while (1) {
 		// loop 돌 때마다(즉, TICK==10ms마다) 키 입력 확인
 		KEY key = get_key();
 
-		// 키 입력 횟수
-		int upCount = 0, downCount = 0, leftCount = 0, rightCount = 0;
-
-		// 키 입력이 있으면 처리
 		if (is_arrow_key(key)) {
-			cursor_move(ktod(key));
+			if (press_key == key) {
+				if (sys_clock - last_sys_clock <= 100) { press_count++; }
+				else { press_count = 1; }
+			}
+			else {
+				press_key = key;
+				press_count = 1;
+			}
+			last_sys_clock = sys_clock;
+			if (press_count == 2) {
+				cursor_move2(ktod(key));
+				press_key = 0;
+				press_count = 0;
+			}
+			else { cursor_move(ktod(key)); }
 		}
 		else {
 			// 방향키 외의 입력
@@ -191,6 +206,19 @@ void init(void) {
 void cursor_move(DIRECTION dir) {
 	POSITION curr = cursor.current;
 	POSITION new_pos = pmove(curr, dir);
+
+	// validation check
+	if (1 <= new_pos.row && new_pos.row <= MAP_HEIGHT - 2 && \
+		1 <= new_pos.column && new_pos.column <= MAP_WIDTH - 2) {
+
+		cursor.previous = cursor.current;
+		cursor.current = new_pos;
+	}
+}
+
+void cursor_move2(DIRECTION dir) {
+	POSITION curr = cursor.current;
+	POSITION new_pos = pmove2(curr, dir);
 
 	// validation check
 	if (1 <= new_pos.row && new_pos.row <= MAP_HEIGHT - 2 && \

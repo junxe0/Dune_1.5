@@ -12,7 +12,6 @@
 const POSITION resource_pos = { 0, 0 };
 const POSITION map_pos = { 1, 0 };
 
-
 char backbuf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 char frontbuf[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 
@@ -35,8 +34,6 @@ void display_cursor(CURSOR cursor);
 void display_object_info(char ob_info[OB_INFO_HEIGHT][OB_INFO_WIDTH]);
 void display_system_message(char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]);
 void display_commands(char command[COMMAND_HEIGHT][COMMAND_WIDTH]);
-
-
 
 void display(
 	RESOURCE resource,

@@ -72,12 +72,18 @@ inline POSITION psub(POSITION p1, POSITION p2) {
 
 // DIRECTION을 POSITION 벡터로 변환하는 함수
 inline POSITION dtop(DIRECTION d) {
-	static POSITION direction_vector[] = { {0, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 0} };
+	static POSITION direction_vector[] = { {0, 0}, {-1, 0} /* 좌 */, {0, 1} /* 상 */, {0, -1}/* 하 */, {1, 0}/* 우 */ };
+	return direction_vector[d];
+}
+
+inline POSITION dtop2(DIRECTION d) {
+	static POSITION direction_vector[] = { {0, 0}, {-3, 0} /* 좌 */, {0, 3} /* 상 */, {0, -3}/* 하 */, {3, 0}/* 우 */ };
 	return direction_vector[d];
 }
 
 // p를 d 방향으로 이동시킨 POSITION
 #define pmove(p, d)		(padd((p), dtop(d)))
+#define pmove2(p, d)	(padd((p), dtop2(d)))
 
 /* ================= game data =================== */
 typedef struct {
