@@ -19,6 +19,7 @@
 #define SYS_MESSAGE_HEIGHT 7
 #define COMMAND_WIDTH 50
 #define COMMAND_HEIGHT 7
+#define MAX_OBJECTS 100  // 최대 오브젝트 수
 
 
 /* ================= 위치와 방향 =================== */
@@ -37,7 +38,7 @@ typedef struct {
 // 수업에서 enum은 생략했는데, 크게 어렵지 않으니 예제 검색
 typedef enum {
 	// k_none: 입력된 키가 없음. d_stay(안 움직이는 경우)에 대응
-	k_none = 0, k_up, k_right, k_left, k_down,
+	k_none = 0, k_up, k_right, k_left, k_down, k_space, k_esc,
 	k_quit,
 	k_undef, // 정의되지 않은 키 입력	
 } KEY;
@@ -93,8 +94,7 @@ typedef struct {
 	int population_max;  // 수용 가능한 인구 수
 } RESOURCE;
 
-
-// 대강 만들어 봤음. 기능 추가하면서 각자 수정할 것
+// 샌드웜 이동
 typedef 
 struct {
 	POSITION pos;		// 현재 위치(position)
@@ -103,5 +103,4 @@ struct {
 	int speed;	// '몇 ms마다 한 칸 움직이는지'를 뜻함
 	int next_move_time;	// 다음에 움직일 시간
 } OBJECT_SAMPLE;
-
 #endif

@@ -25,5 +25,4 @@ void display(
 	char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH],
 	char command[COMMAND_HEIGHT][COMMAND_WIDTH]
 );
-
 #endif
