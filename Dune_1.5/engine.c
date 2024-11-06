@@ -8,6 +8,8 @@
 void init(void);
 void intro(void);
 void outro(void);
+void get_info(POSITION pos);
+void clear_info();
 void cursor_move(DIRECTION dir);
 void cursor_move2(DIRECTION dir);
 void sample_obj_move(void);
@@ -57,6 +59,7 @@ int main(void) {
 		KEY key = get_key();
 
 		if (is_arrow_key(key)) {
+			// 방향키 입력 처리
 			if (press_key == key) {
 				if (sys_clock - last_sys_clock <= 100) { press_count++; }
 				else { press_count = 1; }
@@ -72,6 +75,12 @@ int main(void) {
 				press_count = 0;
 			}
 			else { cursor_move(ktod(key)); }
+		}
+		else if (key == k_space) {
+			get_info(cursor.current);
+		}
+		else if (key == k_esc) {
+			clear_info();
 		}
 		else {
 			// 방향키 외의 입력
@@ -91,6 +100,78 @@ int main(void) {
 		Sleep(TICK);
 		sys_clock += 10;
 	}
+}
+
+void get_info(POSITION pos) {
+	char terrain0 = map[0][pos.row][pos.column];
+	char terrain1 = map[1][pos.row][pos.column];
+	switch (terrain0) {
+	case ' ':
+		clear_info();
+		switch (terrain1) {
+		case 'W':
+			print_line1("선택된 오브젝트 : 샌드웜 ( 중립 )\n");
+			print_line2("생산 비용 | 인구수 : 없음 | 없음\n");
+			print_line3("이동 주기 : 2500\n");
+			print_line4("공격력 : 무한대\n");
+			print_line5("공격 주기 : 10000\n");
+			print_line6("체력 : 무한대\n");
+			print_line7("시야 : 무한대\n");
+			print_line8("명령어 : 없음\n");
+			break;
+		case 'H':
+			print_line1("선택된 오브젝트 : 하베스터\n");
+			print_line2("생산 비용 | 인구수 : 5 | 5\n");
+			print_line3("이동 주기 : 2000\n");
+			print_line4("공격력 : 없음\n");
+			print_line5("공격 주기 : 없음\n");
+			print_line6("체력 : 70\n");
+			print_line7("시야 : 0\n");
+			print_line8("명령어 : H ( Harvest ), M ( Move )\n");
+			break;
+		default:
+			print_line1("선택된 오브젝트 : 사막 지형\n");
+			break;
+		}
+		break;
+	case 'B':
+		clear_info();
+		print_line1("선택된 오브젝트 : 본진\n");
+		print_line2("건설 비용 : 없음\n");
+		print_line3("내구도 : 50\n");
+		print_line4("명령어 : H ( 하베스터 생산 )\n");
+		break;
+	case 'P':
+		clear_info();
+		print_line1("선택된 오브젝트 : 장판\n");
+		print_line2("설명 : 건물 짓기 전에 깔기\n");
+		print_line3("건설 비용 : 1\n");
+		print_line4("내구도 : 없음\n");
+		print_line5("명령어 : 없음\n");
+		break;
+	case 'R':
+		clear_info();
+		print_line1("선택된 오브젝트 : 바위\n");
+		break;
+	case '5':
+		clear_info();
+		print_line1("선택된 오브젝트 : 스파이시\n");
+		break;
+	default:
+		clear_info();
+		break;
+	}
+}
+
+void clear_info() {
+	print_line1("                               \n");
+	print_line2("                               \n");
+	print_line3("                               \n");
+	print_line4("                               \n");
+	print_line5("                               \n");
+	print_line6("                               \n");
+	print_line7("                               \n");
+	print_line8("                               \n");
 }
 
 /* ================= subfunctions =================== */
@@ -140,7 +221,7 @@ void init(void) {
 		map[0][0][j] = '#';
 		map[0][MAP_HEIGHT - 1][j] = '#';
 	}
-	// 각 문자에 대한 위치 배열
+	// 각 문자 위치
 	int b_pos[][2] = { 
 		{1, MAP_HEIGHT - 2}, 
 		{2, MAP_HEIGHT - 2}, 
@@ -198,7 +279,7 @@ void init(void) {
 			map[0][i][j] = ' '; // 기본값을 공백으로 설정
 		}
 	}
-	// 기지
+	// 본진
 	for (int k = 0; k < sizeof(b_pos) / sizeof(b_pos[0]); k++) {
 		int j = b_pos[k][0];
 		int i = b_pos[k][1];
@@ -229,7 +310,7 @@ void init(void) {
 			map[1][i][j] = -1;
 		}
 	}
-	// 하베스트
+	// 하베스터
 	for (int k = 0; k < sizeof(h_pos) / sizeof(h_pos[0]); k++) {
 		int j = h_pos[k][0];
 		int i = h_pos[k][1];

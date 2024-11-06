@@ -37,7 +37,7 @@ typedef struct {
 // 수업에서 enum은 생략했는데, 크게 어렵지 않으니 예제 검색
 typedef enum {
 	// k_none: 입력된 키가 없음. d_stay(안 움직이는 경우)에 대응
-	k_none = 0, k_up, k_right, k_left, k_down,
+	k_none = 0, k_up, k_right, k_left, k_down, k_space, k_esc,
 	k_quit,
 	k_undef, // 정의되지 않은 키 입력	
 } KEY;
@@ -103,5 +103,8 @@ struct {
 	int speed;	// '몇 ms마다 한 칸 움직이는지'를 뜻함
 	int next_move_time;	// 다음에 움직일 시간
 } OBJECT_SAMPLE;
+
+// 색상 배열
+int background_colors[MAP_HEIGHT][MAP_WIDTH]; // 배경색 저장 배열
 
 #endif

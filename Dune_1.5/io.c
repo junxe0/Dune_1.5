@@ -25,6 +25,79 @@ void printo(POSITION pos, char ch) {
 	printf("%s%s%c!%s\n", BACKGROUND_ORANGE, TEXT_WHITE, ch, COLOR_RESET);
 }
 
+void print_line1(char ch[100]) {
+	POSITION line1_pos = { 2, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line1_pos);
+	printf("                                   ");
+	gotoxy(line1_pos);
+	printf("%s", ch);
+}
+
+void print_line2(char ch[100]) {
+	POSITION line2_pos = { 4, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line2_pos);
+	printf("                                   ");
+	gotoxy(line2_pos);
+	printf("%s", ch);
+}
+
+void print_line3(char ch[100]) {
+	POSITION line3_pos = { 6, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line3_pos);
+	printf("                                   ");
+	gotoxy(line3_pos);
+	printf("%s", ch);
+}
+
+void print_line4(char ch[100]) {
+	POSITION line4_pos = { 8, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line4_pos);
+	printf("                                   ");
+	gotoxy(line4_pos);
+	printf("%s", ch);
+}
+
+void print_line5(char ch[100]) {
+	POSITION line5_pos = { 10, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line5_pos);
+	printf("                                   ");
+	gotoxy(line5_pos);
+	printf("%s", ch);
+}
+
+void print_line6(char ch[100]) {
+	POSITION line6_pos = { 12, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line6_pos);
+	printf("                                   ");
+	gotoxy(line6_pos);
+	printf("%s", ch);
+}
+
+void print_line7(char ch[100]) {
+	POSITION line7_pos = { 14, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line7_pos);
+	printf("                                   ");
+	gotoxy(line7_pos);
+	printf("%s", ch);
+}
+
+void print_line8(char ch[100]) {
+	POSITION line8_pos = { 16, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(line8_pos);
+	printf("                                   ");
+	gotoxy(line8_pos);
+	printf("%s", ch);
+}
+
+
 KEY get_key(void) {
 	if (!_kbhit()) {  // 입력된 키가 있는지 확인
 		return k_none;
@@ -42,6 +115,10 @@ KEY get_key(void) {
 		case 80: return k_down;
 		default: return k_undef;
 		}
+	case 32:
+		return k_space;
+	case 27:
+		return k_esc;
 	default: return k_undef;
 	}
 }
