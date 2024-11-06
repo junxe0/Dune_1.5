@@ -24,15 +24,20 @@ char frontbuf3[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH] = { 0 };
 char backbuf4[COMMAND_HEIGHT][COMMAND_WIDTH] = { 0 };
 char frontbuf4[COMMAND_HEIGHT][COMMAND_WIDTH] = { 0 };
 
-void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
-void project2(char src[OB_INFO_HEIGHT][OB_INFO_WIDTH], char dest[OB_INFO_HEIGHT][OB_INFO_WIDTH]);
-void project3(char src[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH], char dest[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]);
-void project4(char src[COMMAND_HEIGHT][COMMAND_WIDTH], char dest[COMMAND_HEIGHT][COMMAND_WIDTH]);
 void display_resource(RESOURCE resource);
+// 맵
+void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]);
 void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]);
+// 커서
 void display_cursor(CURSOR cursor);
+// 상태창
+void project2(char src[OB_INFO_HEIGHT][OB_INFO_WIDTH], char dest[OB_INFO_HEIGHT][OB_INFO_WIDTH]);
 void display_object_info(char ob_info[OB_INFO_HEIGHT][OB_INFO_WIDTH]);
+// 시스템 메시지
+void project3(char src[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH], char dest[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]);
 void display_system_message(char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]);
+// 명령창
+void project4(char src[COMMAND_HEIGHT][COMMAND_WIDTH], char dest[COMMAND_HEIGHT][COMMAND_WIDTH]);
 void display_commands(char command[COMMAND_HEIGHT][COMMAND_WIDTH]);
 
 void display(
@@ -72,15 +77,34 @@ void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP
 		}
 	}
 }
-
 void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	project(map, backbuf);
 
 	for (int i = 0; i < MAP_HEIGHT; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
 			if (frontbuf[i][j] != backbuf[i][j]) {
-				POSITION pos = {i, j};
-				printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT);
+				POSITION pos = { i, j };
+				if (map[0][i][j] == 'B') {
+					printc(padd(map_pos, pos), backbuf[i][j], 31);
+				}
+				else if (map[0][i][j] == 'P') {
+					printc(padd(map_pos, pos), backbuf[i][j], 143);
+				}
+				else if (map[0][i][j] == 'R') {
+					printc(padd(map_pos, pos), backbuf[i][j], 127);
+				}
+				else if (map[0][i][j] == '5') {
+					printo(padd(map_pos, pos), backbuf[i][j]);
+				}
+				else if (map[1][i][j] == 'H') {
+					printc(padd(map_pos, pos), backbuf[i][j], 31);
+				}
+				else if (map[1][i][j] == 'W') {
+					printc(padd(map_pos, pos), backbuf[i][j], 111);
+				}
+				else {
+					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT);
+				}
 			}
 			frontbuf[i][j] = backbuf[i][j];
 		}
@@ -99,7 +123,7 @@ void display_cursor(CURSOR cursor) {
 	printc(padd(map_pos, curr), ch, COLOR_CURSOR);
 }
 
-
+// 상태창
 void project2(char src[OB_INFO_HEIGHT][OB_INFO_WIDTH], char dest[OB_INFO_HEIGHT][OB_INFO_WIDTH]) {
 	for (int i = 0; i < OB_INFO_HEIGHT; i++) {
 		for (int j = 0; j < OB_INFO_WIDTH; j++) {
@@ -109,7 +133,6 @@ void project2(char src[OB_INFO_HEIGHT][OB_INFO_WIDTH], char dest[OB_INFO_HEIGHT]
 		}
 	}
 }
-
 void display_object_info(char ob_info[OB_INFO_HEIGHT][OB_INFO_WIDTH]) {
 	project2(ob_info, backbuf2);
 
@@ -124,6 +147,7 @@ void display_object_info(char ob_info[OB_INFO_HEIGHT][OB_INFO_WIDTH]) {
 	}
 }
 
+// 시스템 메시지
 void project3(char src[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH], char dest[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]) {
 	for (int i = 0; i < SYS_MESSAGE_HEIGHT; i++) {
 		for (int j = 0; j < SYS_MESSAGE_WIDTH; j++) {
@@ -133,7 +157,6 @@ void project3(char src[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH], char dest[SYS_MES
 		}
 	}
 }
-
 void display_system_message(char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]) {
 	project3(system_message, backbuf3);
 
@@ -148,6 +171,7 @@ void display_system_message(char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_
 	}
 }
 
+// 명령창
 void project4(char src[COMMAND_HEIGHT][COMMAND_WIDTH], char dest[COMMAND_HEIGHT][COMMAND_WIDTH]) {
 	for (int i = 0; i < COMMAND_HEIGHT; i++) {
 		for (int j = 0; j < COMMAND_WIDTH; j++) {
@@ -157,7 +181,6 @@ void project4(char src[COMMAND_HEIGHT][COMMAND_WIDTH], char dest[COMMAND_HEIGHT]
 		}
 	}
 }
-
 void display_commands(char command[COMMAND_HEIGHT][COMMAND_WIDTH]) {
 	project4(command, backbuf4);
 

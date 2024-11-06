@@ -96,7 +96,7 @@ int main(void) {
 /* ================= subfunctions =================== */
 void intro(void) {
 	printf("20242397 류준서\n");
-	printf("DUNE 1.5\n");		
+	printf("DUNE 1.5\n");	
 	POSITION pos = { 2, 8 };
 	gotoxy(pos);
 	printf("Loading...\n");
@@ -115,7 +115,7 @@ void intro(void) {
 		}
 	}
 	for (int j = 1; j < 22; j += 2) {
-		int loading_ms = rand() % 700 + 300;
+		int loading_ms = rand() % 100 + 300; // 원래 700 + 300
 		POSITION pos = { 4, j };
 		gotoxy(pos);
 		Sleep(loading_ms);
@@ -140,13 +140,87 @@ void init(void) {
 		map[0][0][j] = '#';
 		map[0][MAP_HEIGHT - 1][j] = '#';
 	}
+	// 각 문자에 대한 위치 배열
+	int b_pos[][2] = { 
+		{1, MAP_HEIGHT - 2}, 
+		{2, MAP_HEIGHT - 2}, 
+		{1, MAP_HEIGHT - 3}, 
+		{2, MAP_HEIGHT - 3},
+		{57, 1}, 
+		{58, 2}, 
+		{57, 2}, 
+		{58, 1} 
+	};
+	int p_pos[][2] = { 
+		{55, 1}, 
+		{56, 2}, 
+		{55, 2}, 
+		{56, 1},
+		{3, MAP_HEIGHT - 2}, 
+		{4, MAP_HEIGHT - 2}, 
+		{3, MAP_HEIGHT - 3}, 
+		{4, MAP_HEIGHT - 3} 
+	};
+	int r_pos[][2] = { 
+		{50, 8}, 
+		{10, 8}, 
+		{20, 13}, 
+		{40, 4}, 
+		{30, 7},
+		{30, 12}, 
+		{30, 13}, 
+		{31, 12}, 
+		{31, 13},
+		{20, 5}, 
+		{20, 6}, 
+		{21, 5}, 
+		{21, 6} 
+	};
+	int s_pos[][2] = { 
+		{1, MAP_HEIGHT - 6}, 
+		{58, 5} 
+	};
+	int h_pos[][2] = {
+		{1, MAP_HEIGHT - 4},
+		{58, 3}
+	};
+	int w_pos[][2] = {
+		{4, 3},
+		{50, MAP_HEIGHT - 6}
+	};
 
+	// 기본 설정
 	for (int i = 1; i < MAP_HEIGHT - 1; i++) {
 		map[0][i][0] = '#';
 		map[0][i][MAP_WIDTH - 1] = '#';
-		for (int j = 1; j < MAP_WIDTH-1; j++) {
-			map[0][i][j] = ' ';
+
+		for (int j = 1; j < MAP_WIDTH - 1; j++) {
+			map[0][i][j] = ' '; // 기본값을 공백으로 설정
 		}
+	}
+	// 기지
+	for (int k = 0; k < sizeof(b_pos) / sizeof(b_pos[0]); k++) {
+		int j = b_pos[k][0];
+		int i = b_pos[k][1];
+		map[0][i][j] = 'B';
+	}
+	// 장판
+	for (int k = 0; k < sizeof(p_pos) / sizeof(p_pos[0]); k++) {
+		int j = p_pos[k][0];
+		int i = p_pos[k][1];
+		map[0][i][j] = 'P';
+	}
+	// 바위
+	for (int k = 0; k < sizeof(r_pos) / sizeof(r_pos[0]); k++) {
+		int j = r_pos[k][0];
+		int i = r_pos[k][1];
+		map[0][i][j] = 'R';
+	}
+	// 스파이시
+	for (int k = 0; k < sizeof(s_pos) / sizeof(s_pos[0]); k++) {
+		int j = s_pos[k][0];
+		int i = s_pos[k][1];
+		map[0][i][j] = '5';
 	}
 
 	// layer 1(map[1])은 비워 두기(-1로 채움)
@@ -155,13 +229,24 @@ void init(void) {
 			map[1][i][j] = -1;
 		}
 	}
+	// 하베스트
+	for (int k = 0; k < sizeof(h_pos) / sizeof(h_pos[0]); k++) {
+		int j = h_pos[k][0];
+		int i = h_pos[k][1];
+		map[1][i][j] = 'H';
+	}
+	// 샌드웜
+	for (int k = 0; k < sizeof(w_pos) / sizeof(w_pos[0]); k++) {
+		int j = w_pos[k][0];
+		int i = w_pos[k][1];
+		map[1][i][j] = 'W';
+	}
 
 	// 상태창
 	for (int j = 0; j < OB_INFO_WIDTH; j++) {
 		ob_info[0][j] = '#';
 		ob_info[OB_INFO_HEIGHT - 1][j] = '#';
 	}
-
 	for (int i = 1; i < OB_INFO_HEIGHT - 1; i++) {
 		ob_info[i][0] = '#';
 		ob_info[i][OB_INFO_WIDTH - 1] = '#';
@@ -175,7 +260,6 @@ void init(void) {
 		system_message[0][j] = '#';
 		system_message[SYS_MESSAGE_HEIGHT - 1][j] = '#';
 	}
-
 	for (int i = 1; i < SYS_MESSAGE_HEIGHT - 1; i++) {
 		system_message[i][0] = '#';
 		system_message[i][SYS_MESSAGE_WIDTH - 1] = '#';
@@ -189,7 +273,6 @@ void init(void) {
 		command[0][j] = '#';
 		command[COMMAND_HEIGHT - 1][j] = '#';
 	}
-
 	for (int i = 1; i < COMMAND_HEIGHT - 1; i++) {
 		command[i][0] = '#';
 		command[i][COMMAND_WIDTH - 1] = '#';

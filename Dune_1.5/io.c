@@ -20,6 +20,11 @@ void printc(POSITION pos, char ch, int color) {
 	printf("%c", ch);
 }
 
+void printo(POSITION pos, char ch) {
+	gotoxy(pos);
+	printf("%s%s%c!%s\n", BACKGROUND_ORANGE, TEXT_WHITE, ch, COLOR_RESET);
+}
+
 KEY get_key(void) {
 	if (!_kbhit()) {  // 입력된 키가 있는지 확인
 		return k_none;
