@@ -12,7 +12,7 @@
 
 // 표시할 색상 정의. 대충 맞춰 뒀는데, 취향껏 추가하거나 변경하기
 #define COLOR_DEFAULT	15
-#define COLOR_CURSOR	238
+#define COLOR_CURSOR	224
 #define COLOR_RESOURCE  112
 
 // 지금은 자원, 맵, 커서만 표시
