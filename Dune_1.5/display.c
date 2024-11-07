@@ -83,27 +83,31 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 	for (int i = 0; i < MAP_HEIGHT; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
 			if (frontbuf[i][j] != backbuf[i][j]) {
+				char ch = backbuf[i][j];
 				POSITION pos = { i, j };
-				if (map[0][i][j] == 'B') {
-					printc(padd(map_pos, pos), backbuf[i][j], 31);
+				if (ch == 'B') {
+					printc(padd(map_pos, pos), ch, 31);
 				}
-				else if (map[0][i][j] == 'P') {
-					printc(padd(map_pos, pos), backbuf[i][j], 143);
+				else if (ch == 'P') {
+					printc(padd(map_pos, pos), ch, 15);
 				}
-				else if (map[0][i][j] == 'R') {
-					printc(padd(map_pos, pos), backbuf[i][j], 127);
+				else if (ch == 'R') {
+					printc(padd(map_pos, pos), ch, 143);
 				}
-				else if (map[0][i][j] == '5') {
-					printo(padd(map_pos, pos), backbuf[i][j]);
+				else if (ch == '1' || ch == '2' || ch == '3' || ch == '4' || ch == '5') {
+					printo(padd(map_pos, pos), ch);
 				}
-				else if (map[1][i][j] == 'H') {
-					printc(padd(map_pos, pos), backbuf[i][j], 31);
+				else if (ch == 'H') {
+					printc(padd(map_pos, pos), ch, 31);
 				}
-				else if (map[1][i][j] == 'W') {
-					printc(padd(map_pos, pos), backbuf[i][j], 111);
+				else if (ch == 'W') {
+					printc(padd(map_pos, pos), ch, 111);
+				}
+				else if (ch == '#') {
+					printc(padd(map_pos, pos), ch, 15);
 				}
 				else {
-					printc(padd(map_pos, pos), backbuf[i][j], COLOR_DEFAULT);
+					printc(padd(map_pos, pos), ch, 112);
 				}
 			}
 			frontbuf[i][j] = backbuf[i][j];
@@ -121,12 +125,12 @@ void display_cursor(CURSOR cursor) {
 		printc(padd(map_pos, prev), ch, 31);
 	}
 	else if (ch == 'P') {
-		printc(padd(map_pos, prev), ch, 143);
+		printc(padd(map_pos, prev), ch, 15);
 	}
 	else if (ch == 'R') {
-		printc(padd(map_pos, prev), ch, 127);
+		printc(padd(map_pos, prev), ch, 143);
 	}
-	else if (ch == '5') {
+	else if (ch == '1' || ch == '2' || ch == '3' || ch == '4' || ch == '5') {
 		printo(padd(map_pos, prev), ch);
 	}
 	else if (ch == 'H') {
@@ -135,8 +139,11 @@ void display_cursor(CURSOR cursor) {
 	else if (ch == 'W') {
 		printc(padd(map_pos, prev), ch, 111);
 	}
+	else if (ch == '#') {
+		printc(padd(map_pos, prev), ch, 15);
+	}
 	else {
-		printc(padd(map_pos, prev), ch, COLOR_DEFAULT);
+		printc(padd(map_pos, prev), ch, 112);
 	}
 
 	ch = frontbuf[curr.row][curr.column];

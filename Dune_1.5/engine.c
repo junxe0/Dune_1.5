@@ -9,7 +9,8 @@ void init(void);
 void intro(void);
 void outro(void);
 void get_info(POSITION pos);
-void clear_info();
+void clear_info(void);
+void clear_command(void);
 void cursor_move(DIRECTION dir);
 void cursor_move2(DIRECTION dir);
 void sample_obj_move(void);
@@ -81,6 +82,7 @@ int main(void) {
 		}
 		else if (key == k_esc) {
 			clear_info();
+			clear_command();
 		}
 		else {
 			// 방향키 외의 입력
@@ -105,73 +107,75 @@ int main(void) {
 void get_info(POSITION pos) {
 	char terrain0 = map[0][pos.row][pos.column];
 	char terrain1 = map[1][pos.row][pos.column];
+	clear_info();
+	clear_command();
 	switch (terrain0) {
 	case ' ':
-		clear_info();
 		switch (terrain1) {
 		case 'W':
-			print_line1("선택된 오브젝트 : 샌드웜 ( 중립 )\n");
-			print_line2("생산 비용 : 없음 | 인구수 : 없음\n");
-			print_line3("이동 주기 : 2500\n");
-			print_line4("공격력 : 무한대\n");
-			print_line5("공격 주기 : 10000\n");
-			print_line6("체력 : 무한대\n");
-			print_line7("시야 : 무한대\n");
-			print_line8("명령어 : 없음\n");
+			info_print_line1("선택된 오브젝트 : 샌드웜 ( 중립 )\n");
+			info_print_line2("생산 비용 : 없음 | 인구수 : 없음\n");
+			info_print_line3("이동 주기 : 2500\n");
+			info_print_line4("공격력 : 무한대\n");
+			info_print_line5("공격 주기 : 10000\n");
+			info_print_line6("체력 : 무한대\n");
+			info_print_line7("시야 : 무한대\n");
+			command_print_line1("명령어 : 없음\n");
 			break;
 		case 'H':
-			print_line1("선택된 오브젝트 : 하베스터 ( 공통 )\n");
-			print_line2("생산 비용 : 5 | 인구수 : 5\n");
-			print_line3("이동 주기 : 2000\n");
-			print_line4("공격력 : 없음\n");
-			print_line5("공격 주기 : 없음\n");
-			print_line6("체력 : 70\n");
-			print_line7("시야 : 0\n");
-			print_line8("명령어 : H ( Harvest ), M ( Move )\n");
+			info_print_line1("선택된 오브젝트 : 하베스터 ( 공통 )\n");
+			info_print_line2("생산 비용 : 5 | 인구수 : 5\n");
+			info_print_line3("이동 주기 : 2000\n");
+			info_print_line4("공격력 : 없음\n");
+			info_print_line5("공격 주기 : 없음\n");
+			info_print_line6("체력 : 70\n");
+			info_print_line7("시야 : 0\n");
+			command_print_line1("명령어 : H ( Harvest ), M ( Move )\n");
 			break;
 		default:
-			print_line1("선택된 오브젝트 : 사막 지형\n");
+			info_print_line1("선택된 오브젝트 : 사막 지형\n");
 			break;
 		}
 		break;
 	case 'B':
-		clear_info();
-		print_line1("선택된 오브젝트 : 본진\n");
-		print_line2("건설 비용 : 없음\n");
-		print_line3("내구도 : 50\n");
-		print_line4("명령어 : H ( 하베스터 생산 )\n");
+		info_print_line1("선택된 오브젝트 : 본진\n");
+		info_print_line2("건설 비용 : 없음\n");
+		info_print_line3("내구도 : 50\n");
+		command_print_line1("명령어 : H ( 하베스터 생산 )\n");
 		break;
 	case 'P':
-		clear_info();
-		print_line1("선택된 오브젝트 : 장판\n");
-		print_line2("설명 : 건물 짓기 전에 깔기\n");
-		print_line3("건설 비용 : 1\n");
-		print_line4("내구도 : 없음\n");
-		print_line5("명령어 : 없음\n");
+		info_print_line1("선택된 오브젝트 : 장판\n");
+		info_print_line2("설명 : 건물 짓기 전에 깔기\n");
+		info_print_line3("건설 비용 : 1\n");
+		info_print_line4("내구도 : 없음\n");
+		command_print_line1("명령어 : 없음\n");
 		break;
 	case 'R':
-		clear_info();
-		print_line1("선택된 오브젝트 : 바위\n");
+		info_print_line1("선택된 오브젝트 : 바위\n");
 		break;
 	case '5':
-		clear_info();
-		print_line1("선택된 오브젝트 : 스파이시\n");
+		info_print_line1("선택된 오브젝트 : 스파이시\n");
 		break;
 	default:
-		clear_info();
 		break;
 	}
 }
 
-void clear_info() {
-	print_line1("                                    \n");
-	print_line2("                                    \n");
-	print_line3("                                    \n");
-	print_line4("                                    \n");
-	print_line5("                                    \n");
-	print_line6("                                    \n");
-	print_line7("                                    \n");
-	print_line8("                                    \n");
+void clear_info(void) {
+	info_print_line1("                                    \n");
+	info_print_line2("                                    \n");
+	info_print_line3("                                    \n");
+	info_print_line4("                                    \n");
+	info_print_line5("                                    \n");
+	info_print_line6("                                    \n");
+	info_print_line7("                                    \n");
+	info_print_line8("                                    \n");
+}
+
+void clear_command(void) {
+	command_print_line1("                                    \n");
+	command_print_line2("                                    \n");
+	command_print_line3("                                    \n");
 }
 
 /* ================= subfunctions =================== */

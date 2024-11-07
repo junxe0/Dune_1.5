@@ -25,59 +25,80 @@ void printo(POSITION pos, char ch) {
 	printf("%s%s%c%s\n", BACKGROUND_ORANGE, TEXT_WHITE, ch, COLOR_RESET);
 }
 
-void print_line1(char ch[100]) {
-	POSITION line1_pos = { 2, MAP_WIDTH + 1 };
+void info_print_line1(char ch[100]) {
+	POSITION info_line1_pos = { 2, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line1_pos);
+	gotoxy(info_line1_pos);
 	printf("%s", ch);
 }
 
-void print_line2(char ch[100]) {
-	POSITION line2_pos = { 4, MAP_WIDTH + 1 };
+void info_print_line2(char ch[100]) {
+	POSITION info_line2_pos = { 4, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line2_pos);
+	gotoxy(info_line2_pos);
 	printf("%s", ch);
 }
 
-void print_line3(char ch[100]) {
-	POSITION line3_pos = { 6, MAP_WIDTH + 1 };
+void info_print_line3(char ch[100]) {
+	POSITION info_line3_pos = { 6, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line3_pos);
+	gotoxy(info_line3_pos);
 	printf("%s", ch);
 }
 
-void print_line4(char ch[100]) {
-	POSITION line4_pos = { 8, MAP_WIDTH + 1 };
+void info_print_line4(char ch[100]) {
+	POSITION info_line4_pos = { 8, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line4_pos);
+	gotoxy(info_line4_pos);
 	printf("%s", ch);
 }
 
-void print_line5(char ch[100]) {
-	POSITION line5_pos = { 10, MAP_WIDTH + 1 };
+void info_print_line5(char ch[100]) {
+	POSITION info_line5_pos = { 10, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line5_pos);
+	gotoxy(info_line5_pos);
 	printf("%s", ch);
 }
 
-void print_line6(char ch[100]) {
-	POSITION line6_pos = { 12, MAP_WIDTH + 1 };
+void info_print_line6(char ch[100]) {
+	POSITION info_line6_pos = { 12, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line6_pos);
+	gotoxy(info_line6_pos);
 	printf("%s", ch);
 }
 
-void print_line7(char ch[100]) {
-	POSITION line7_pos = { 14, MAP_WIDTH + 1 };
+void info_print_line7(char ch[100]) {
+	POSITION info_line7_pos = { 14, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line7_pos);
+	gotoxy(info_line7_pos);
 	printf("%s", ch);
 }
 
-void print_line8(char ch[100]) {
-	POSITION line8_pos = { 16, MAP_WIDTH + 1 };
+void info_print_line8(char ch[100]) {
+	POSITION info_line8_pos = { 16, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(line8_pos);
+	gotoxy(info_line8_pos);
+	printf("%s", ch);
+}
+
+void command_print_line1(char ch[100]) {
+	POSITION command_line1_pos = { MAP_HEIGHT + 2, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(command_line1_pos);
+	printf("%s", ch);
+}
+
+void command_print_line2(char ch[100]) {
+	POSITION command_line2_pos = { MAP_HEIGHT + 4, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(command_line2_pos);
+	printf("%s", ch);
+}
+
+void command_print_line3(char ch[100]) {
+	POSITION command_line3_pos = { MAP_HEIGHT + 6, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(command_line3_pos);
 	printf("%s", ch);
 }
 
