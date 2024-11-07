@@ -117,7 +117,27 @@ void display_cursor(CURSOR cursor) {
 	POSITION curr = cursor.current;
 
 	char ch = frontbuf[prev.row][prev.column];
-	printc(padd(map_pos, prev), ch, COLOR_DEFAULT);
+	if (ch == 'B') {
+		printc(padd(map_pos, prev), ch, 31);
+	}
+	else if (ch == 'P') {
+		printc(padd(map_pos, prev), ch, 143);
+	}
+	else if (ch == 'R') {
+		printc(padd(map_pos, prev), ch, 127);
+	}
+	else if (ch == '5') {
+		printo(padd(map_pos, prev), ch);
+	}
+	else if (ch == 'H') {
+		printc(padd(map_pos, prev), ch, 31);
+	}
+	else if (ch == 'W') {
+		printc(padd(map_pos, prev), ch, 111);
+	}
+	else {
+		printc(padd(map_pos, prev), ch, COLOR_DEFAULT);
+	}
 
 	ch = frontbuf[curr.row][curr.column];
 	printc(padd(map_pos, curr), ch, COLOR_CURSOR);

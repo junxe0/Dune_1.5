@@ -22,7 +22,7 @@ void printc(POSITION pos, char ch, int color) {
 
 void printo(POSITION pos, char ch) {
 	gotoxy(pos);
-	printf("%s%s%c!%s\n", BACKGROUND_ORANGE, TEXT_WHITE, ch, COLOR_RESET);
+	printf("%s%s%c%s\n", BACKGROUND_ORANGE, TEXT_WHITE, ch, COLOR_RESET);
 }
 
 void print_line1(char ch[100]) {
@@ -80,7 +80,6 @@ void print_line8(char ch[100]) {
 	gotoxy(line8_pos);
 	printf("%s", ch);
 }
-
 
 KEY get_key(void) {
 	if (!_kbhit()) {  // 입력된 키가 있는지 확인
