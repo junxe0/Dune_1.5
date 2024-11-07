@@ -19,8 +19,6 @@
 #define SYS_MESSAGE_HEIGHT 7
 #define COMMAND_WIDTH 50
 #define COMMAND_HEIGHT 7
-#define MAX_OBJECTS 100  // 최대 오브젝트 수
-
 
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체
