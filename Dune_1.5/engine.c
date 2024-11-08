@@ -21,17 +21,16 @@ void sandworm2_move(void);
 POSITION sandworm_next_position(void);
 POSITION sandworm2_next_position(void);
 
-
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
 CURSOR cursor = { { 1, 1 }, { 1, 1 } };
-
 
 /* ================= game data =================== */
 char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
 char ob_info[OB_INFO_HEIGHT][OB_INFO_WIDTH] = { 0 };
 char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH] = { 0 };
 char command[COMMAND_HEIGHT][COMMAND_WIDTH] = { 0 };
+// 본진
 int bb_pos[][2] = {
 	{1, 16},
 	{2, 16},
@@ -44,6 +43,7 @@ int rb_pos[][2] = {
 	{57, 2},
 	{58, 1}
 };
+// 장판
 int p_pos[][2] = {
 	{55, 1},
 	{56, 2},
@@ -54,6 +54,7 @@ int p_pos[][2] = {
 	{3, 15},
 	{4, 15}
 };
+// 바위
 int r_pos[][2] = {
 	{50, 8},
 	{10, 8},
@@ -69,42 +70,66 @@ int r_pos[][2] = {
 	{21, 5},
 	{21, 6}
 };
+// 스파이스
 int s_pos[][2] = {
 	{1, 12},
 	{58, 5}
 };
-int bh_pos[][2] = {
-	{1, 14}
+// 하베스터
+int bh_pos[MAX_HARVESTERS][2] = {
+	{1, 14},
+	{7, 7}
 };
-int rh_pos[][2] = {
-	{58, 3}
+int rh_pos[MAX_HARVESTERS][2] = {
+	{58, 3},
+	{40, 3}
 };
+int bh_count = sizeof(bh_pos) / sizeof(bh_pos[0]);
+int rh_count = sizeof(rh_pos) / sizeof(rh_pos[0]);
+// 샌드웜
+int sandworm1_r = 0;
+int sandworm1_r_avoid = 0;
+int sandworm2_r = 0;
+int sandworm2_r_avoid = 0;
 
+/* ================= 구조체 =================== */
 RESOURCE resource = { 
+	// 스파이스
 	.spice = 0,
 	.spice_max = 0,
+	// 인구
 	.population = 0,
 	.population_max = 0
 };
 
 SANDWORM sandworm1 = {
+	// 위치 좌표
 	.pos = {4, 3},
+	// 목적지 좌표
 	.dest = {MAP_HEIGHT - 2, MAP_WIDTH - 2},
+	 // 문자
 	.repr = 'W',
+	// 이동
 	.speed = 100,
 	.next_move_time = 100,
-	.next_defecation_time = 0, // 초기화
-	.last_defecation_time = 0   // 초기화
+	// 배설
+	.next_defecation_time = 0,
+	.last_defecation_time = 0
 };
 
 SANDWORM sandworm2 = {
+	// 위치 좌표
 	.pos = {12, 50},
+	// 목적지 좌표 
 	.dest = {MAP_HEIGHT - 2, MAP_WIDTH - 2},
+	// 문자
 	.repr = 'W',
+	// 이동
 	.speed = 100,
 	.next_move_time = 100,
-	.next_defecation_time = 0, // 초기화
-	.last_defecation_time = 0   // 초기화
+	// 배설
+	.next_defecation_time = 0,
+	.last_defecation_time = 0
 };
 
 /* ================= main() =================== */
@@ -429,25 +454,33 @@ void create_spice(POSITION pos) {
 }
 
 void remove_b_harvester(int index) {
-	// 하베스터 삭제
-	for (int i = index; i < sizeof(bh_pos) / sizeof(bh_pos[0]); i++) {
+	if (index < 0 || index >= bh_count) { return; }
+
+	for (int i = index; i < bh_count - 1; i++) {
 		bh_pos[i][0] = bh_pos[i + 1][0];
 		bh_pos[i][1] = bh_pos[i + 1][1];
 	}
+
+	bh_count--;
+
+	bh_pos[bh_count][0] = -1;
+	bh_pos[bh_count][1] = -1;
 }
 
 void remove_r_harvester(int index) {
-	// 하베스터 삭제
-	for (int i = index; i < sizeof(rh_pos) / sizeof(rh_pos[0]); i++) {
+	if (index < 0 || index >= rh_count) { return; }
+
+	for (int i = index; i < rh_count - 1; i++) {
 		rh_pos[i][0] = rh_pos[i + 1][0];
 		rh_pos[i][1] = rh_pos[i + 1][1];
 	}
+
+	rh_count--;
+
+	rh_pos[rh_count][0] = -1;
+	rh_pos[rh_count][1] = -1;
 }
 
-int sandworm1_r = 0;
-int sandworm1_r_avoid = 0;
-int sandworm2_r = 0;
-int sandworm2_r_avoid = 0;
 POSITION sandworm_next_position(void) {
 	POSITION diff = psub(sandworm1.dest, sandworm1.pos);
 	DIRECTION dir;
@@ -465,38 +498,18 @@ POSITION sandworm_next_position(void) {
 
 	// 이동 방향 결정
 	if (abs(diff.row) >= abs(diff.column)) {
-		if (sandworm1_r == 1 && sandworm1_r_avoid == d_up && diff.row >= 0) {
-			dir = d_right;
-		}
-		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_down && diff.row >= 0) {
-			dir = d_left;
-		}
-		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_up && diff.row < 0) {
-			dir = d_left;
-		}
-		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_down && diff.row < 0) {
-			dir = d_right;
-		}
-		else {
-			dir = (diff.row >= 0) ? d_down : d_up;
-		}
+		if (sandworm1_r == 1 && sandworm1_r_avoid == d_up && diff.row >= 0) { dir = d_right; }
+		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_down && diff.row >= 0) { dir = d_left; }
+		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_up && diff.row < 0) { dir = d_left; }
+		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_down && diff.row < 0) { dir = d_right; }
+		else { dir = (diff.row >= 0) ? d_down : d_up; }
 	}
 	else {
-		if (sandworm1_r == 1 && sandworm1_r_avoid == d_right && diff.column >= 0) {
-			dir = d_up;
-		}
-		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_left && diff.column >= 0) {
-			dir = d_down;
-		}
-		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_left && diff.column < 0) {
-			dir = d_down;
-		}
-		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_right && diff.column < 0) {
-			dir = d_up;
-		}
-		else {
-			dir = (diff.column >= 0) ? d_right : d_left;
-		}
+		if (sandworm1_r == 1 && sandworm1_r_avoid == d_right && diff.column >= 0) { dir = d_up; }
+		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_left && diff.column >= 0) { dir = d_down; }
+		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_left && diff.column < 0) { dir = d_down; }
+		else if (sandworm1_r == 1 && sandworm1_r_avoid == d_right && diff.column < 0) { dir = d_up; }
+		else { dir = (diff.column >= 0) ? d_right : d_left; }
 	}
 
 	// 다음 위치 계산

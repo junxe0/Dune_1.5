@@ -10,6 +10,7 @@
 /* ================= system parameters =================== */
 #define TICK 10		// time unit(ms)
 
+// UI 범위
 #define N_LAYER 2
 #define MAP_WIDTH	60
 #define MAP_HEIGHT	18
@@ -19,6 +20,8 @@
 #define SYS_MESSAGE_HEIGHT 7
 #define COMMAND_WIDTH 50
 #define COMMAND_HEIGHT 7
+// 최대
+#define MAX_HARVESTERS 10
 
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체

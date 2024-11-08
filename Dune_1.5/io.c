@@ -126,3 +126,18 @@ KEY get_key(void) {
 	default: return k_undef;
 	}
 }
+
+
+void test_print_line1(char ch[100], int a, int b) {
+	POSITION info_line1_pos = { 2, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(info_line1_pos);
+	printf("%s (%d, %d)", ch, a, b);
+}
+
+void test_print_line2(char ch[100], int a, int b) {
+	POSITION info_line1_pos = { 4, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(info_line1_pos);
+	printf("%s (%d, %d)", ch, a, b);
+}

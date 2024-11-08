@@ -24,6 +24,8 @@ void info_print_line8(char ch[100]);
 void command_print_line1(char ch[100]);
 void command_print_line2(char ch[100]);
 void command_print_line3(char ch[100]);
+void test_print_line1(char ch[100], int a, int b);
+void test_print_line2(char ch[100], int a, int b);
 void gotoxy(POSITION pos);
 void set_color(int color);
 #endif
