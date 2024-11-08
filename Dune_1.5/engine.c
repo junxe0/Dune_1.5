@@ -78,14 +78,15 @@ int s_pos[][2] = {
 // 하베스터
 int bh_pos[MAX_HARVESTERS][2] = {
 	{1, 14},
-	{7, 7}
+	{7, 7},
+	{23, 13}
 };
 int rh_pos[MAX_HARVESTERS][2] = {
 	{58, 3},
 	{40, 3}
 };
-int bh_count = sizeof(bh_pos) / sizeof(bh_pos[0]);
-int rh_count = sizeof(rh_pos) / sizeof(rh_pos[0]);
+int bh_count = 3;
+int rh_count = 2;
 // 샌드웜
 int sandworm1_r = 0;
 int sandworm1_r_avoid = 0;
@@ -176,7 +177,9 @@ int main(void) {
 		else {
 			// 방향키 외의 입력
 			switch (key) {
-			case k_quit: outro();
+			case k_quit:
+				outro();
+				break;
 			case k_none:
 			case k_undef:
 			default: break;
@@ -195,13 +198,13 @@ int main(void) {
 }
 
 void get_info(POSITION pos) {
-	char terrain0 = map[0][pos.row][pos.column];
-	char terrain1 = map[1][pos.row][pos.column];
+	char ch0 = map[0][pos.row][pos.column];
+	char ch1 = map[1][pos.row][pos.column];
 	clear_info();
 	clear_command();
-	switch (terrain0) {
+	switch (ch0) {
 	case ' ':
-		switch (terrain1) {
+		switch (ch1) {
 		case 'W':
 			info_print_line1("선택된 오브젝트 : 샌드웜 ( 중립 )\n");
 			info_print_line2("생산 비용 : 없음 | 인구수 : 없음\n");
@@ -244,7 +247,28 @@ void get_info(POSITION pos) {
 		info_print_line1("선택된 오브젝트 : 바위\n");
 		break;
 	case '5':
+	case '4':
+	case '3':
+	case '2':
+	case '1':
 		info_print_line1("선택된 오브젝트 : 스파이시\n");
+		switch (ch0) {
+		case '4':
+			info_print_line2("매장량 : 4\n");
+			break;
+		case '3':
+			info_print_line2("매장량 : 3\n");
+			break;
+		case '2':
+			info_print_line2("매장량 : 2\n");
+			break;
+		case '1':
+			info_print_line2("매장량 : 1\n");
+			break;
+		default:
+			info_print_line2("매장량 : 5\n");
+			break;
+		}
 		break;
 	default:
 		break;
@@ -361,13 +385,13 @@ void init(void) {
 		}
 	}
 	// 아군 하베스터
-	for (int k = 0; k < sizeof(bh_pos) / sizeof(bh_pos[0]); k++) {
+	for (int k = 0; k < bh_count; k++) {
 		int j = bh_pos[k][0];
 		int i = bh_pos[k][1];
 		map[1][i][j] = 'X';
 	}
 	// 적군 하베스터
-	for (int k = 0; k < sizeof(rh_pos) / sizeof(rh_pos[0]); k++) {
+	for (int k = 0; k < rh_count; k++) {
 		int j = rh_pos[k][0];
 		int i = rh_pos[k][1];
 		map[1][i][j] = 'Y';
@@ -445,6 +469,39 @@ void cursor_move2(DIRECTION dir) {
 }
 
 /* ================= sandworm movement =================== */
+double calculate_distance(POSITION a, POSITION b) {
+	return sqrt(pow(a.row - b.row, 2) + pow(a.column - b.column, 2));
+}
+
+POSITION find_closest_harvester(POSITION sandworm_pos) {
+	double min_distance = INFINITY;
+	POSITION closest_harvester = { -1, -1 };
+
+	// 아군 하베스터 찾기
+	for (int i = 0; i < bh_count; i++) {
+		POSITION harvester_pos = { bh_pos[i][1], bh_pos[i][0] };
+		double distance = calculate_distance(sandworm_pos, harvester_pos);
+
+		if (distance < min_distance) {
+			min_distance = distance;
+			closest_harvester = harvester_pos;
+		}
+	}
+
+	// 적군 하베스터 찾기
+	for (int i = 0; i < rh_count; i++) {
+		POSITION harvester_pos = { rh_pos[i][1], rh_pos[i][0] };
+		double distance = calculate_distance(sandworm_pos, harvester_pos);
+
+		if (distance < min_distance) {
+			min_distance = distance;
+			closest_harvester = harvester_pos;
+		}
+	}
+
+	return closest_harvester;
+}
+
 void create_spice(POSITION pos) {
 	// 스파이스 매장지를 비어 있는 곳에 생성
 	if (map[0][pos.row][pos.column] == ' ' || map[0][pos.row][pos.column] == -1) {
@@ -456,13 +513,15 @@ void create_spice(POSITION pos) {
 void remove_b_harvester(int index) {
 	if (index < 0 || index >= bh_count) { return; }
 
+	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
 	for (int i = index; i < bh_count - 1; i++) {
 		bh_pos[i][0] = bh_pos[i + 1][0];
 		bh_pos[i][1] = bh_pos[i + 1][1];
 	}
 
-	bh_count--;
+	bh_count--; // 하베스터 수 감소
 
+	// 마지막 요소를 초기화 (선택 사항)
 	bh_pos[bh_count][0] = -1;
 	bh_pos[bh_count][1] = -1;
 }
@@ -470,13 +529,15 @@ void remove_b_harvester(int index) {
 void remove_r_harvester(int index) {
 	if (index < 0 || index >= rh_count) { return; }
 
+	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
 	for (int i = index; i < rh_count - 1; i++) {
 		rh_pos[i][0] = rh_pos[i + 1][0];
 		rh_pos[i][1] = rh_pos[i + 1][1];
 	}
 
-	rh_count--;
+	rh_count--; // 하베스터 수 감소
 
+	// 마지막 요소를 초기화 (선택 사항)
 	rh_pos[rh_count][0] = -1;
 	rh_pos[rh_count][1] = -1;
 }
@@ -487,14 +548,14 @@ POSITION sandworm_next_position(void) {
 
 	// 목적지 도착 처리
 	if (diff.row == 0 && diff.column == 0) {
-		if (sandworm1.dest.row == 1 && sandworm1.dest.column == 1) {
-			sandworm1.dest = (POSITION){ MAP_HEIGHT - 2, MAP_WIDTH - 2 };
-		}
-		else {
-			sandworm1.dest = (POSITION){ 1, 1 };
-		}
-		return sandworm1.pos; // 현재 위치 반환
-	}
+        // 도착 시 가장 가까운 하베스터를 다시 찾음
+        sandworm1.dest = find_closest_harvester(sandworm1.pos);
+        // 새로운 목적지 찾기가 실패할 경우 현재 위치를 반환
+        if (sandworm1.dest.row == -1 && sandworm1.dest.column == -1) {
+            return sandworm1.pos; // 이동하지 않음
+        }
+        diff = psub(sandworm1.dest, sandworm1.pos); // 새로운 목적지와의 차이를 다시 계산
+    }
 
 	// 이동 방향 결정
 	if (abs(diff.row) >= abs(diff.column)) {
@@ -519,6 +580,7 @@ POSITION sandworm_next_position(void) {
 		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 &&
 		map[0][next_pos.row][next_pos.column] != 'R') {
 		sandworm1_r = 0;
+		sandworm1_r_avoid = 0;
 		return next_pos; // 바위가 없으면 유효한 위치로 이동
 	}
 
@@ -547,30 +609,59 @@ void sandworm_move(void) {
 
 	// 현재 위치를 맵에서 지우기
 	map[1][sandworm1.pos.row][sandworm1.pos.column] = -1; // 현재 위치 지우기
-	POSITION next_pos = sandworm_next_position(); // 다음 위치로 이동
 
-	// 다음 위치에서 H가 있는지 확인
-	if (map[1][next_pos.row][next_pos.column] == 'H') {
-		map[1][next_pos.row][next_pos.column] = -1;
+	// 가장 가까운 하베스터를 찾고 목적지 설정
+	POSITION closest_harvester = find_closest_harvester(sandworm1.pos);
+	POSITION next_pos = sandworm_next_position();
+	if (closest_harvester.row != -1 && closest_harvester.column != -1) {
+		sandworm1.dest = closest_harvester; // 새로운 목적지 업데이트
+		if (map[1][next_pos.row][next_pos.column] == 'X') {
+			// 아군 하베스터를 잡아먹음
+			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
-		// 하베스터 좌표 배열에서 해당 하베스터 삭제
-		for (int i = 0; i < sizeof(bh_pos) / sizeof(bh_pos[0]); i++) {
-			if (bh_pos[i][0] == next_pos.row && bh_pos[i][1] == next_pos.column) {
-				remove_b_harvester(i);
-				break;
+			// 하베스터 좌표 배열에서 해당 하베스터 삭제
+			for (int i = 0; i < bh_count; i++) {
+				// 좌표 비교
+				if (bh_pos[i][0] == next_pos.column && bh_pos[i][1] == next_pos.row) {
+					remove_b_harvester(i); // 배열에서 삭제
+					break; // 삭제 후 루프 종료
+				}
+			}
+
+			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
+			closest_harvester = find_closest_harvester(sandworm1.pos);
+			if (closest_harvester.row != -1 && closest_harvester.column != -1) {
+				sandworm1.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
-		for (int i = 0; i < sizeof(rh_pos) / sizeof(rh_pos[0]); i++) {
-			if (rh_pos[i][0] == next_pos.row && rh_pos[i][1] == next_pos.column) {
-				remove_r_harvester(i);
-				break;
+		else if (map[1][next_pos.row][next_pos.column] == 'Y') {
+			// 적군 하베스터를 잡아먹음
+			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
+
+			// 하베스터 좌표 배열에서 해당 하베스터 삭제
+			for (int i = 0; i < rh_count; i++) {
+				// 좌표 비교
+				if (rh_pos[i][0] == next_pos.column && rh_pos[i][1] == next_pos.row) {
+					remove_r_harvester(i); // 배열에서 삭제
+					break; // 삭제 후 루프 종료
+				}
+			}
+
+			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
+			closest_harvester = find_closest_harvester(sandworm1.pos);
+			if (closest_harvester.row != -1 && closest_harvester.column != -1) {
+				sandworm1.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
+		sandworm1.pos = next_pos;
+		map[1][sandworm1.pos.row][sandworm1.pos.column] = sandworm1.repr; // 새 위치에 'W' 출력
 	}
-
-	// 샌드웜의 위치 업데이트
-	sandworm1.pos = next_pos;
-	map[1][sandworm1.pos.row][sandworm1.pos.column] = sandworm1.repr; // 새 위치에 'W' 출력
+	else {
+		POSITION next_pos = { sandworm1.pos.row, sandworm1.pos.column };
+		sandworm1.pos = next_pos;
+		map[1][sandworm1.pos.row][sandworm1.pos.column] = sandworm1.repr; // 새 위치에 'W' 출력
+	}
+	
 
 	// 스파이스 배설 처리
 	if (sys_clock >= sandworm1.next_defecation_time) {
@@ -591,13 +682,13 @@ POSITION sandworm2_next_position(void) {
 
 	// 목적지 도착 처리
 	if (diff.row == 0 && diff.column == 0) {
-		if (sandworm2.dest.row == 1 && sandworm2.dest.column == 1) {
-			sandworm2.dest = (POSITION){ MAP_HEIGHT - 2, MAP_WIDTH - 2 };
+		// 도착 시 가장 가까운 하베스터를 다시 찾음
+		sandworm2.dest = find_closest_harvester(sandworm2.pos);
+		// 새로운 목적지 찾기가 실패할 경우 현재 위치를 반환
+		if (sandworm2.dest.row == -1 && sandworm2.dest.column == -1) {
+			return sandworm2.pos; // 이동하지 않음
 		}
-		else {
-			sandworm2.dest = (POSITION){ 1, 1 };
-		}
-		return sandworm2.pos; // 현재 위치 반환
+		diff = psub(sandworm2.dest, sandworm2.pos); // 새로운 목적지와의 차이를 다시 계산
 	}
 
 	// 이동 방향 결정
@@ -623,7 +714,8 @@ POSITION sandworm2_next_position(void) {
 		1 <= next_pos.column && next_pos.column <= MAP_WIDTH - 2 &&
 		map[0][next_pos.row][next_pos.column] != 'R') {
 		sandworm2_r = 0;
-		return next_pos; // 바위가 없으면 위치로 이동
+		sandworm2_r_avoid = 0;
+		return next_pos; // 바위가 없으면 유효한 위치로 이동
 	}
 
 	// 바위가 있는 경우 다른 방향으로 이동
@@ -635,11 +727,13 @@ POSITION sandworm2_next_position(void) {
 			map[0][direction_pos.row][direction_pos.column] != 'R') {
 			sandworm2_r = 1;
 			sandworm2_r_avoid = direction_arr[i];
+			// 대체 가능한 위치로 이동
 			return direction_pos;
 		}
 	}
 
-	return sandworm2.pos;
+	// 만약 모든 방향에 바위가 있어도, 움직일 수 있는 방향을 찾지 못했을 경우
+	return sandworm2.pos; // 이동할 수 있는 위치가 없을 경우 제자리
 }
 
 void sandworm2_move(void) {
@@ -649,30 +743,58 @@ void sandworm2_move(void) {
 
 	// 현재 위치를 맵에서 지우기
 	map[1][sandworm2.pos.row][sandworm2.pos.column] = -1; // 현재 위치 지우기
-	POSITION next_pos = sandworm2_next_position(); // 다음 위치로 이동
 
-	// 다음 위치에서 H가 있는지 확인
-	if (map[1][next_pos.row][next_pos.column] == 'H') {
-		map[1][next_pos.row][next_pos.column] = -1;
+	// 가장 가까운 하베스터를 찾고 목적지 설정
+	POSITION closest_harvester = find_closest_harvester(sandworm2.pos);
+	POSITION next_pos = sandworm2_next_position();
+	if (closest_harvester.row != -1 && closest_harvester.column != -1) {
+		sandworm2.dest = closest_harvester; // 새로운 목적지 업데이트
+		if (map[1][next_pos.row][next_pos.column] == 'X') {
+			// 아군 하베스터를 잡아먹음
+			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
-		// 하베스터 좌표 배열에서 해당 하베스터 삭제
-		for (int i = 0; i < sizeof(bh_pos) / sizeof(bh_pos[0]); i++) {
-			if (bh_pos[i][0] == next_pos.row && bh_pos[i][1] == next_pos.column) {
-				remove_b_harvester(i);
-				break;
+			// 하베스터 좌표 배열에서 해당 하베스터 삭제
+			for (int i = 0; i < bh_count; i++) {
+				// 좌표 비교
+				if (bh_pos[i][0] == next_pos.column && bh_pos[i][1] == next_pos.row) {
+					remove_b_harvester(i); // 배열에서 삭제
+					break; // 삭제 후 루프 종료
+				}
+			}
+
+			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
+			closest_harvester = find_closest_harvester(sandworm2.pos);
+			if (closest_harvester.row != -1 && closest_harvester.column != -1) {
+				sandworm2.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
-		for (int i = 0; i < sizeof(rh_pos) / sizeof(rh_pos[0]); i++) {
-			if (rh_pos[i][0] == next_pos.row && rh_pos[i][1] == next_pos.column) {
-				remove_r_harvester(i);
-				break;
+		else if (map[1][next_pos.row][next_pos.column] == 'Y') {
+			// 적군 하베스터를 잡아먹음
+			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
+
+			// 하베스터 좌표 배열에서 해당 하베스터 삭제
+			for (int i = 0; i < rh_count; i++) {
+				// 좌표 비교
+				if (rh_pos[i][0] == next_pos.column && rh_pos[i][1] == next_pos.row) {
+					remove_r_harvester(i); // 배열에서 삭제
+					break; // 삭제 후 루프 종료
+				}
+			}
+
+			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
+			closest_harvester = find_closest_harvester(sandworm2.pos);
+			if (closest_harvester.row != -1 && closest_harvester.column != -1) {
+				sandworm2.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
+		sandworm2.pos = next_pos;
+		map[1][sandworm2.pos.row][sandworm2.pos.column] = sandworm2.repr; // 새 위치에 'W' 출력
 	}
-
-	// 샌드웜의 위치 업데이트
-	sandworm2.pos = next_pos;
-	map[1][sandworm2.pos.row][sandworm2.pos.column] = sandworm2.repr; // 새 위치에 'W' 출력
+	else {
+		POSITION next_pos = { sandworm2.pos.row, sandworm2.pos.column };
+		sandworm2.pos = next_pos;
+		map[1][sandworm2.pos.row][sandworm2.pos.column] = sandworm2.repr; // 새 위치에 'W' 출력
+	}
 
 	// 스파이스 배설 처리
 	if (sys_clock >= sandworm2.next_defecation_time) {

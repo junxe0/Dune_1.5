@@ -6,6 +6,7 @@
 #include <Windows.h>
 #include <conio.h>
 #include <assert.h>
+#include <math.h>
 
 /* ================= system parameters =================== */
 #define TICK 10		// time unit(ms)
