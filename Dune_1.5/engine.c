@@ -13,6 +13,8 @@ void clear_info(void);
 void clear_command(void);
 void cursor_move(DIRECTION dir);
 void cursor_move2(DIRECTION dir);
+double calculate_distance(POSITION a, POSITION b);
+POSITION find_closest_harvester(POSITION sandworm_pos);
 void create_spice(POSITION pos);
 void remove_b_harvester(int index);
 void remove_r_harvester(int index);
@@ -77,16 +79,13 @@ int s_pos[][2] = {
 };
 // 하베스터
 int bh_pos[MAX_HARVESTERS][2] = {
-	{1, 14},
-	{7, 7},
-	{23, 13}
+	{1, 14}
 };
 int rh_pos[MAX_HARVESTERS][2] = {
-	{58, 3},
-	{40, 3}
+	{58, 3}
 };
-int bh_count = 3;
-int rh_count = 2;
+int bh_count = 1;
+int rh_count = 1;
 // 샌드웜
 int sandworm1_r = 0;
 int sandworm1_r_avoid = 0;
@@ -111,8 +110,11 @@ SANDWORM sandworm1 = {
 	 // 문자
 	.repr = 'W',
 	// 이동
-	.speed = 100,
-	.next_move_time = 100,
+	.speed = 2500,
+	.next_move_time = 2500,
+	// 공격
+	.next_attack_time = 10000,
+	.last_attack_time = 0,
 	// 배설
 	.next_defecation_time = 0,
 	.last_defecation_time = 0
@@ -126,8 +128,11 @@ SANDWORM sandworm2 = {
 	// 문자
 	.repr = 'W',
 	// 이동
-	.speed = 100,
-	.next_move_time = 100,
+	.speed = 2500,
+	.next_move_time = 2500,
+	// 공격
+	.next_attack_time = 10000,
+	.last_attack_time = 0,
 	// 배설
 	.next_defecation_time = 0,
 	.last_defecation_time = 0
@@ -136,6 +141,7 @@ SANDWORM sandworm2 = {
 /* ================= main() =================== */
 int main(void) {
 	srand((unsigned int)time(NULL));
+	set_color(15);
 
 	init();
 	intro();
@@ -330,6 +336,98 @@ void intro(void) {
 }
 
 void outro(void) {
+	set_color(15);
+	for (int i = 0; i < 10; i++) {
+		system("cls");
+		int color = rand() % 15 + 1;
+		set_color(color);
+		for (int j = 0; j < 8; j++) {
+			POSITION End_pos = { 1 + j, 24 };
+			gotoxy(End_pos);
+			if (j == 0) {
+				printf("   ********                                  ********               **\n");
+			}
+			else if (j == 1) {
+				printf("  **//////**                                /**/////               /**\n");
+			}
+			else if (j == 2) {
+				printf(" **      //   ******   **********   *****   /**       *******      /**\n");
+			}
+			else if (j == 3) {
+				printf("/**          //////** //**//**//** **///**  /******* //**///**  ******\n");
+			}
+			else if (j == 4) {
+				printf("/**    *****  *******  /** /** /**/*******  /**////   /**  /** **///**\n");
+			}
+			else if (j == 5) {
+				printf("//**  ////** **////**  /** /** /**/**////   /**       /**  /**/**  /**\n");
+			}
+			else if (j == 6) {
+				printf(" //******** //******** *** /** /**//******  /******** ***  /**//******\n");
+			}
+			else if (j == 7) {
+				printf("  ////////   //////// ///  //  //  //////   //////// ///   //  ////// \n");
+			}
+		}
+		for (int j = 0; j < 8; j++) {
+			POSITION End_pos = { 11 + j, 33 };
+			gotoxy(End_pos);
+			if (j == 0) {
+				printf("  ********                   **    **                 \n");
+			}
+			else if (j == 1) {
+				printf(" **//////                   //**  **                  \n");
+			}
+			else if (j == 2) {
+				printf("/**         *****   *****    //****    ******  **   **\n");
+			}
+			else if (j == 3) {
+				printf("/********* **///** **///**    //**    **////**/**  /**\n");
+			}
+			else if (j == 4) {
+				printf("////////**/*******/*******     /**   /**   /**/**  /**\n");
+			}
+			else if (j == 5) {
+				printf("       /**/**//// /**////      /**   /**   /**/**  /**\n");
+			}
+			else if (j == 6) {
+				printf(" ******** //******//******     /**   //****** //******\n");
+			}
+			else if (j == 7) {
+				printf("////////   //////  //////      //     //////   ////// \n");
+			}
+		}
+		for (int j = 0; j < 8; j++) {
+			POSITION End_pos = { 21 + j, 24 };
+			gotoxy(End_pos);
+			if (j == 0) {
+				printf(" ****     **                   **     ********** **                    \n");
+			}
+			else if (j == 1) {
+				printf("/**/**   /**                  /**    /////**/// //                     \n");
+			}
+			else if (j == 2) {
+				printf("/**//**  /**  *****  **   ** ******      /**     ** **********   ***** \n");
+			}
+			else if (j == 3) {
+				printf("/** //** /** **///**//** ** ///**/       /**    /**//**//**//** **///**\n");
+			}
+			else if (j == 4) {
+				printf("/**  //**/**/******* //***    /**        /**    /** /** /** /**/*******\n");
+			}
+			else if (j == 5) {
+				printf("/**   //****/**////   **/**   /**        /**    /** /** /** /**/**//// \n");
+			}
+			else if (j == 6) {
+				printf("/**    //***//****** ** //**  //**       /**    /** *** /** /**//******\n");
+			}
+			else if (j == 7) {
+				printf("//      ///  ////// //   //    //        //     // ///  //  //  ////// \n");
+			}
+		}
+		Sleep(500);
+	}
+	set_color(15);
 	exit(0);
 }
 
@@ -615,7 +713,7 @@ void sandworm_move(void) {
 	POSITION next_pos = sandworm_next_position();
 	if (closest_harvester.row != -1 && closest_harvester.column != -1) {
 		sandworm1.dest = closest_harvester; // 새로운 목적지 업데이트
-		if (map[1][next_pos.row][next_pos.column] == 'X') {
+		if (map[1][next_pos.row][next_pos.column] == 'X' && sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
 			// 아군 하베스터를 잡아먹음
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
@@ -628,13 +726,15 @@ void sandworm_move(void) {
 				}
 			}
 
+			sandworm1.last_attack_time = sys_clock;
+
 			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
 			closest_harvester = find_closest_harvester(sandworm1.pos);
 			if (closest_harvester.row != -1 && closest_harvester.column != -1) {
 				sandworm1.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
-		else if (map[1][next_pos.row][next_pos.column] == 'Y') {
+		else if (map[1][next_pos.row][next_pos.column] == 'Y' && sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
 			// 적군 하베스터를 잡아먹음
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
@@ -646,6 +746,8 @@ void sandworm_move(void) {
 					break; // 삭제 후 루프 종료
 				}
 			}
+
+			sandworm1.last_attack_time = sys_clock;
 
 			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
 			closest_harvester = find_closest_harvester(sandworm1.pos);
@@ -661,7 +763,6 @@ void sandworm_move(void) {
 		sandworm1.pos = next_pos;
 		map[1][sandworm1.pos.row][sandworm1.pos.column] = sandworm1.repr; // 새 위치에 'W' 출력
 	}
-	
 
 	// 스파이스 배설 처리
 	if (sys_clock >= sandworm1.next_defecation_time) {
@@ -669,7 +770,7 @@ void sandworm_move(void) {
 		if (map[0][build_pos.row][build_pos.column] == ' ' || map[0][build_pos.row][build_pos.column] == -1) {
 			create_spice(build_pos); // 현재 위치에 스파이스 생성
 		}
-		int defecation_interval = rand() % 4000 + 1000; // 1초에서 5초 사이
+		int defecation_interval = rand() % 10001 + 5000; // 5초 ~ 15초
 		sandworm1.next_defecation_time = sys_clock + defecation_interval; // 다음 배설 시간 설정
 	}
 
@@ -749,7 +850,7 @@ void sandworm2_move(void) {
 	POSITION next_pos = sandworm2_next_position();
 	if (closest_harvester.row != -1 && closest_harvester.column != -1) {
 		sandworm2.dest = closest_harvester; // 새로운 목적지 업데이트
-		if (map[1][next_pos.row][next_pos.column] == 'X') {
+		if (map[1][next_pos.row][next_pos.column] == 'X' && sandworm2.last_attack_time + sandworm2.next_attack_time <= sys_clock) {
 			// 아군 하베스터를 잡아먹음
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
@@ -762,13 +863,15 @@ void sandworm2_move(void) {
 				}
 			}
 
+			sandworm2.last_attack_time= sys_clock;
+
 			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
 			closest_harvester = find_closest_harvester(sandworm2.pos);
 			if (closest_harvester.row != -1 && closest_harvester.column != -1) {
 				sandworm2.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
-		else if (map[1][next_pos.row][next_pos.column] == 'Y') {
+		else if (map[1][next_pos.row][next_pos.column] == 'Y' && sandworm2.last_attack_time + sandworm2.next_attack_time <= sys_clock) {
 			// 적군 하베스터를 잡아먹음
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
@@ -780,6 +883,8 @@ void sandworm2_move(void) {
 					break; // 삭제 후 루프 종료
 				}
 			}
+
+			sandworm2.last_attack_time = sys_clock;
 
 			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
 			closest_harvester = find_closest_harvester(sandworm2.pos);
@@ -802,7 +907,7 @@ void sandworm2_move(void) {
 		if (map[0][build_pos.row][build_pos.column] == ' ' || map[0][build_pos.row][build_pos.column] == -1) {
 			create_spice(build_pos); // 현재 위치에 스파이스 생성
 		}
-		int defecation_interval = rand() % 4000 + 1000; // 1초에서 5초 사이
+		int defecation_interval = rand() % 10001 + 5000; // 5초 ~ 15초
 		sandworm2.next_defecation_time = sys_clock + defecation_interval; // 다음 배설 시간 설정
 	}
 

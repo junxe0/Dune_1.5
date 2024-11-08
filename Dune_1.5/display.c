@@ -108,19 +108,25 @@ void display_cursor(CURSOR cursor) {
 	POSITION curr = cursor.current;
 
 	char ch = frontbuf[prev.row][prev.column];
-	if (ch == 'RB') { printc(padd(map_pos, prev), 'B', 79); }
-	else if (ch == 'BB') { printc(padd(map_pos, prev), 'B', 31); }
+	if (ch == 'A') { printc(padd(map_pos, prev), 'B', 31); }
+	else if (ch == 'B') { printc(padd(map_pos, prev), 'B', 79); }
 	else if (ch == 'P') { printc(padd(map_pos, prev), ch, 15); }
 	else if (ch == 'R') { printc(padd(map_pos, prev), ch, 143); }
 	else if (ch == '1' || ch == '2' || ch == '3' || ch == '4' || ch == '5') { printo(padd(map_pos, prev), ch); }
-	else if (ch == 'RH') { printc(padd(map_pos, prev), 'H', 79); }
-	else if (ch == 'BH') { printc(padd(map_pos, prev), 'H', 31); }
+	else if (ch == 'X') { printc(padd(map_pos, prev), 'H', 31); }
+	else if (ch == 'Y') { printc(padd(map_pos, prev), 'H', 79); }
 	else if (ch == 'W') { printc(padd(map_pos, prev), ch, 111); }
 	else if (ch == '#') { printc(padd(map_pos, prev), ch, 15); }
 	else { printc(padd(map_pos, prev), ch, 112); }
 
 	ch = frontbuf[curr.row][curr.column];
-	printc(padd(map_pos, curr), ch, COLOR_CURSOR);
+	if (ch == 'A') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
+	else if (ch == 'B') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
+	else if (ch == 'X') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
+	else if (ch == 'Y') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
+	else {
+		printc(padd(map_pos, curr), ch, COLOR_CURSOR);
+	}
 }
 
 // ªÛ≈¬√¢

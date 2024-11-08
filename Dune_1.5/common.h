@@ -99,12 +99,20 @@ typedef struct {
 // 샌드웜 이동
 typedef 
 struct {
+	// 현재 좌표
 	POSITION pos;
+	// 목적지 좌표
 	POSITION dest;
+	// 문자
 	char repr;
+	// 이동
 	int speed;
 	int next_move_time;
-	int next_defecation_time; // 다음 배설 시간
-	int last_defecation_time; // 마지막 배설 시간
+	// 공격
+	int next_attack_time;
+	int last_attack_time;
+	// 배설
+	int next_defecation_time;
+	int last_defecation_time;
 } SANDWORM;
 #endif
