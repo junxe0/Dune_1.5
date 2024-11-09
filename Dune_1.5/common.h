@@ -21,8 +21,8 @@
 #define SYS_MESSAGE_HEIGHT 7
 #define COMMAND_WIDTH 50
 #define COMMAND_HEIGHT 7
-// 최대
-#define MAX_HARVESTERS 10
+// 최대 하베스터
+#define MAX_HARVESTERS 100
 
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체
@@ -40,7 +40,8 @@ typedef struct {
 // 수업에서 enum은 생략했는데, 크게 어렵지 않으니 예제 검색
 typedef enum {
 	// k_none: 입력된 키가 없음. d_stay(안 움직이는 경우)에 대응
-	k_none = 0, k_up, k_right, k_left, k_down, k_space, k_esc,
+	k_none = 0, k_up, k_right, k_left, k_down, 
+	k_space, k_esc, k_h, k_m,
 	k_quit,
 	k_undef, // 정의되지 않은 키 입력	
 } KEY;

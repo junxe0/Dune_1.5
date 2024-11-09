@@ -11,13 +11,13 @@ void outro(void);
 void get_info(POSITION pos);
 void clear_info(void);
 void clear_command(void);
-void cursor_move(DIRECTION dir);
-void cursor_move2(DIRECTION dir);
+void cursor_move(DIRECTION dir, int c_click);
+void add_b_harvester(void);
+void remove_b_harvester(int index);
+void remove_r_harvester(int index);
 double calculate_distance(POSITION a, POSITION b);
 POSITION find_closest_harvester(POSITION sandworm_pos);
 void create_spice(POSITION pos);
-void remove_b_harvester(int index);
-void remove_r_harvester(int index);
 void sandworm_move(void);
 void sandworm2_move(void);
 POSITION sandworm_next_position(void);
@@ -91,6 +91,8 @@ int sandworm1_r = 0;
 int sandworm1_r_avoid = 0;
 int sandworm2_r = 0;
 int sandworm2_r_avoid = 0;
+// 명령어
+int command_key = 0;
 
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
@@ -167,21 +169,47 @@ int main(void) {
 			}
 			last_sys_clock = sys_clock;
 			if (press_count == 2) {
-				cursor_move2(ktod(key));
+				cursor_move(ktod(key), 2);
 				press_key = 0;
 				press_count = 0;
 			}
-			else { cursor_move(ktod(key)); }
+			else { cursor_move(ktod(key), 1); }
 		}
 		else if (key == k_space) {
 			get_info(cursor.current);
 		}
+		else if (key == k_h) {
+			if (command_key == 1) {
+				sys_msg_print("수확하기 8번에서 추가 ( 아직 미구현 )");
+			}
+			else if (command_key == 2) {
+				POSITION pos = { 1, 14 };
+				if (5 <= resource.spice) {
+					if (map[1][pos.row][pos.column] == 'X') {
+						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.");
+					}
+					else {
+						sys_msg_print("A new harvester ready");
+						resource.spice -= 5;
+						add_b_harvester();
+					}
+				}
+				else {
+					sys_msg_print("Not enough spice");
+				}
+			}
+		}
+		else if (key == k_m) {
+			if (command_key == 1) {
+				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
+			}
+		}
 		else if (key == k_esc) {
 			clear_info();
 			clear_command();
+			command_key = 0;
 		}
 		else {
-			// 방향키 외의 입력
 			switch (key) {
 			case k_quit:
 				outro();
@@ -203,76 +231,94 @@ int main(void) {
 	}
 }
 
+/* ================= UI 메세지 =================== */
 void get_info(POSITION pos) {
 	char ch0 = map[0][pos.row][pos.column];
 	char ch1 = map[1][pos.row][pos.column];
 	clear_info();
 	clear_command();
+	command_key = 0;
 	switch (ch0) {
 	case ' ':
 		switch (ch1) {
 		case 'W':
-			info_print_line1("선택된 오브젝트 : 샌드웜 ( 중립 )\n");
-			info_print_line2("생산 비용 : 없음 | 인구수 : 없음\n");
-			info_print_line3("이동 주기 : 2500\n");
-			info_print_line4("공격력 : 무한대\n");
-			info_print_line5("공격 주기 : 10000\n");
-			info_print_line6("체력 : 무한대\n");
-			info_print_line7("시야 : 무한대\n");
-			command_print_line1("명령어 : 없음\n");
+			info_print("선택된 오브젝트 : 샌드웜 ( 중립 )\n", 1);
+			info_print("생산 비용 : 없음\n", 2);
+			info_print("인구수 : 없음\n", 3);
+			info_print("이동 주기 : 2500\n", 4);
+			info_print("공격력 : 무한대\n", 5);
+			info_print("공격 주기 : 10000\n", 6);
+			info_print("체력 : 무한대\n", 7);
+			info_print("시야 : 무한대\n", 8);
+			command_print("명령어 : 없음\n", 1);
 			break;
-		case 'H':
-			info_print_line1("선택된 오브젝트 : 하베스터 ( 공통 )\n");
-			info_print_line2("생산 비용 : 5 | 인구수 : 5\n");
-			info_print_line3("이동 주기 : 2000\n");
-			info_print_line4("공격력 : 없음\n");
-			info_print_line5("공격 주기 : 없음\n");
-			info_print_line6("체력 : 70\n");
-			info_print_line7("시야 : 0\n");
-			command_print_line1("명령어 : H ( Harvest ), M ( Move )\n");
+		case 'X':
+		case 'Y':
+			info_print("선택된 오브젝트 : 하베스터\n", 1);
+			info_print("생산 비용 : 5\n", 2);
+			info_print("인구수 : 5\n", 3);
+			info_print("이동 주기 : 2000\n", 4);
+			info_print("공격력 : 없음\n", 5);
+			info_print("공격 주기 : 없음\n", 6);
+			info_print("체력 : 70\n", 7);
+			info_print("시야 : 0\n", 8);
+			switch (ch1) {
+			case 'X':
+				command_print("명령어 : H ( Harvest ), M ( Move )\n", 1);
+				command_key = 1;
+			default:
+				break;
+			}
 			break;
 		default:
-			info_print_line1("선택된 오브젝트 : 사막 지형\n");
+			info_print("선택된 오브젝트 : 사막 지형\n", 1);
 			break;
 		}
 		break;
+	case 'A':
 	case 'B':
-		info_print_line1("선택된 오브젝트 : 본진\n");
-		info_print_line2("건설 비용 : 없음\n");
-		info_print_line3("내구도 : 50\n");
-		command_print_line1("명령어 : H ( 하베스터 생산 )\n");
+		info_print("선택된 오브젝트 : 본진\n", 1);
+		info_print("건설 비용 : 없음\n", 2);
+		info_print("내구도 : 50\n", 3);
+		switch (ch0) {
+		case 'A':
+			command_print("명령어 : H ( 하베스터 생산 )\n", 1);
+			command_key = 2;
+		default:
+			break;
+		}
 		break;
 	case 'P':
-		info_print_line1("선택된 오브젝트 : 장판\n");
-		info_print_line2("설명 : 건물 짓기 전에 깔기\n");
-		info_print_line3("건설 비용 : 1\n");
-		info_print_line4("내구도 : 없음\n");
-		command_print_line1("명령어 : 없음\n");
+		info_print("선택된 오브젝트 : 장판\n", 1);
+		info_print("설명 : 건물 짓기 전에 깔기\n", 2);
+		info_print("건설 비용 : 1\n", 3);
+		info_print("내구도 : 없음\n", 4);
+		command_print("명령어 : 없음\n", 1);
 		break;
 	case 'R':
-		info_print_line1("선택된 오브젝트 : 바위\n");
+		info_print("선택된 오브젝트 : 바위\n", 1);
 		break;
 	case '5':
 	case '4':
 	case '3':
 	case '2':
 	case '1':
-		info_print_line1("선택된 오브젝트 : 스파이시\n");
+		info_print("선택된 오브젝트 : 스파이시\n", 1);
 		switch (ch0) {
 		case '4':
-			info_print_line2("매장량 : 4\n");
+			info_print("매장량 : 4\n", 2);
 			break;
 		case '3':
-			info_print_line2("매장량 : 3\n");
+			info_print("매장량 : 3\n", 2);
 			break;
 		case '2':
-			info_print_line2("매장량 : 2\n");
+			info_print("매장량 : 2\n", 2);
 			break;
 		case '1':
-			info_print_line2("매장량 : 1\n");
+			info_print("매장량 : 1\n", 2);
 			break;
 		default:
-			info_print_line2("매장량 : 5\n");
+			info_print("매장량 : 5\n", 2);
 			break;
 		}
 		break;
@@ -281,21 +327,17 @@ void get_info(POSITION pos) {
 	}
 }
 
+/* ================= 청소 =================== */
 void clear_info(void) {
-	info_print_line1("                                    \n");
-	info_print_line2("                                    \n");
-	info_print_line3("                                    \n");
-	info_print_line4("                                    \n");
-	info_print_line5("                                    \n");
-	info_print_line6("                                    \n");
-	info_print_line7("                                    \n");
-	info_print_line8("                                    \n");
+	for (int i = 1; i <= 8; i++) {
+		info_print("                                    \n", i);
+	}
 }
 
 void clear_command(void) {
-	command_print_line1("                                    \n");
-	command_print_line2("                                    \n");
-	command_print_line3("                                    \n");
+	for (int i = 1; i < 3; i++) {
+		command_print("                                    \n", i);
+	}
 }
 
 /* ================= subfunctions =================== */
@@ -539,10 +581,10 @@ void init(void) {
 	map[1][sandworm2.pos.row][sandworm2.pos.column] = sandworm2.repr;
 }
 
-// (가능하다면) 지정한 방향으로 커서 이동
-void cursor_move(DIRECTION dir) {
+/* ================= 커서 =================== */
+void cursor_move(DIRECTION dir, int c_count) {
 	POSITION curr = cursor.current;
-	POSITION new_pos = pmove(curr, dir);
+	POSITION new_pos = c_count == 1 ? pmove(curr, dir) : pmove2(curr, dir);
 
 	// validation check
 	if (1 <= new_pos.row && new_pos.row <= MAP_HEIGHT - 2 && \
@@ -553,20 +595,50 @@ void cursor_move(DIRECTION dir) {
 	}
 }
 
-void cursor_move2(DIRECTION dir) {
-	POSITION curr = cursor.current;
-	POSITION new_pos = pmove2(curr, dir);
+/* ================= 하베스터 =================== */
+void add_b_harvester(void) {
+	bh_count++; // 하베스터 수 증가
 
-	// validation check
-	if (1 <= new_pos.row && new_pos.row <= MAP_HEIGHT - 2 && \
-		1 <= new_pos.column && new_pos.column <= MAP_WIDTH - 2) {
+	bh_pos[bh_count - 1][0] = 1;
+	bh_pos[bh_count - 1][1] = 14;
 
-		cursor.previous = cursor.current;
-		cursor.current = new_pos;
-	}
+	POSITION pos = { 1, 14 };
+	map[1][pos.row][pos.column] = 'X';
 }
 
-/* ================= sandworm movement =================== */
+void remove_b_harvester(int index) {
+	if (index < 0 || index >= bh_count) { return; }
+
+	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
+	for (int i = index; i < bh_count; i++) {
+		bh_pos[i][0] = bh_pos[i + 1][0];
+		bh_pos[i][1] = bh_pos[i + 1][1];
+	}
+
+	bh_count--; // 하베스터 수 감소
+
+	// 마지막 요소를 초기화 (선택 사항)
+	bh_pos[bh_count][0] = -1;
+	bh_pos[bh_count][1] = -1;
+}
+
+void remove_r_harvester(int index) {
+	if (index < 0 || index >= rh_count) { return; }
+
+	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
+	for (int i = index; i < rh_count; i++) {
+		rh_pos[i][0] = rh_pos[i + 1][0];
+		rh_pos[i][1] = rh_pos[i + 1][1];
+	}
+
+	rh_count--; // 하베스터 수 감소
+
+	// 마지막 요소를 초기화 (선택 사항)
+	rh_pos[rh_count][0] = -1;
+	rh_pos[rh_count][1] = -1;
+}
+
+/* ================= 샌드웜 =================== */
 double calculate_distance(POSITION a, POSITION b) {
 	return sqrt(pow(a.row - b.row, 2) + pow(a.column - b.column, 2));
 }
@@ -606,38 +678,6 @@ void create_spice(POSITION pos) {
 		int spice_amount = rand() % 5 + 1; // 1에서 5 사이의 랜덤한 매장량
 		map[0][pos.row][pos.column] = '0' + spice_amount; // 스파이스 표시
 	}
-}
-
-void remove_b_harvester(int index) {
-	if (index < 0 || index >= bh_count) { return; }
-
-	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
-	for (int i = index; i < bh_count - 1; i++) {
-		bh_pos[i][0] = bh_pos[i + 1][0];
-		bh_pos[i][1] = bh_pos[i + 1][1];
-	}
-
-	bh_count--; // 하베스터 수 감소
-
-	// 마지막 요소를 초기화 (선택 사항)
-	bh_pos[bh_count][0] = -1;
-	bh_pos[bh_count][1] = -1;
-}
-
-void remove_r_harvester(int index) {
-	if (index < 0 || index >= rh_count) { return; }
-
-	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
-	for (int i = index; i < rh_count - 1; i++) {
-		rh_pos[i][0] = rh_pos[i + 1][0];
-		rh_pos[i][1] = rh_pos[i + 1][1];
-	}
-
-	rh_count--; // 하베스터 수 감소
-
-	// 마지막 요소를 초기화 (선택 사항)
-	rh_pos[rh_count][0] = -1;
-	rh_pos[rh_count][1] = -1;
 }
 
 POSITION sandworm_next_position(void) {
@@ -701,8 +741,14 @@ POSITION sandworm_next_position(void) {
 }
 
 void sandworm_move(void) {
+	int last_pos = -1;
 	if (sys_clock <= sandworm1.next_move_time) {
 		return; // 아직 이동할 시간이 아님
+	}
+	POSITION next_pos = sandworm_next_position();
+	if (sys_clock <= sandworm1.last_attack_time + sandworm1.next_attack_time &&\
+		(map[1][next_pos.row][next_pos.column] == 'X' || map[1][next_pos.row][next_pos.column] == 'Y')) {
+		return;
 	}
 
 	// 현재 위치를 맵에서 지우기
@@ -710,10 +756,9 @@ void sandworm_move(void) {
 
 	// 가장 가까운 하베스터를 찾고 목적지 설정
 	POSITION closest_harvester = find_closest_harvester(sandworm1.pos);
-	POSITION next_pos = sandworm_next_position();
 	if (closest_harvester.row != -1 && closest_harvester.column != -1) {
 		sandworm1.dest = closest_harvester; // 새로운 목적지 업데이트
-		if (map[1][next_pos.row][next_pos.column] == 'X' && sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
+		if (map[1][next_pos.row][next_pos.column] == 'X') {
 			// 아군 하베스터를 잡아먹음
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
@@ -734,7 +779,7 @@ void sandworm_move(void) {
 				sandworm1.dest = closest_harvester; // 새로운 목적지로 업데이트
 			}
 		}
-		else if (map[1][next_pos.row][next_pos.column] == 'Y' && sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
+		else if (map[1][next_pos.row][next_pos.column] == 'Y') {
 			// 적군 하베스터를 잡아먹음
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
@@ -842,12 +887,17 @@ void sandworm2_move(void) {
 		return; // 아직 이동할 시간이 아님
 	}
 
+	POSITION next_pos = sandworm2_next_position();
+	if (sys_clock <= sandworm2.last_attack_time + sandworm2.next_attack_time && \
+		(map[1][next_pos.row][next_pos.column] == 'X' || map[1][next_pos.row][next_pos.column] == 'Y')) {
+		return;
+	}
+
 	// 현재 위치를 맵에서 지우기
 	map[1][sandworm2.pos.row][sandworm2.pos.column] = -1; // 현재 위치 지우기
 
 	// 가장 가까운 하베스터를 찾고 목적지 설정
 	POSITION closest_harvester = find_closest_harvester(sandworm2.pos);
-	POSITION next_pos = sandworm2_next_position();
 	if (closest_harvester.row != -1 && closest_harvester.column != -1) {
 		sandworm2.dest = closest_harvester; // 새로운 목적지 업데이트
 		if (map[1][next_pos.row][next_pos.column] == 'X' && sandworm2.last_attack_time + sandworm2.next_attack_time <= sys_clock) {

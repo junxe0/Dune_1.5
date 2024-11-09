@@ -2,6 +2,7 @@
 * raw(?) I/O
 */
 #include "io.h"
+#include <string.h>
 
 void gotoxy(POSITION pos) {
 	COORD coord = { pos.column, pos.row }; // 행, 열 반대로 전달
@@ -25,80 +26,33 @@ void printo(POSITION pos, char ch) {
 	printf("%s%s%c%s\n", BACKGROUND_ORANGE, TEXT_WHITE, ch, COLOR_RESET);
 }
 
-void info_print_line1(char ch[100]) {
-	POSITION info_line1_pos = { 2, MAP_WIDTH + 1 };
+void info_print(char ch[100], int line) {
+	POSITION info_print_pos = { 2 * line, MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(info_line1_pos);
+	gotoxy(info_print_pos);
 	printf("%s", ch);
 }
 
-void info_print_line2(char ch[100]) {
-	POSITION info_line2_pos = { 4, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line2_pos);
-	printf("%s", ch);
+char sys_msg[5][100] = { "" };
+void sys_msg_print(char ch[100]) {
+	for (int i = 4; i > 0; i--) {
+		strcpy_s(sys_msg[i], sizeof(sys_msg[i]), sys_msg[i - 1]);
+	}
+	strcpy_s(sys_msg[0], sizeof(sys_msg[0]), ch);
+
+	// 메시지 출력
+	for (int i = 0; i < 5; i++) {
+		POSITION command_print_pos = { MAP_HEIGHT + SYS_MESSAGE_HEIGHT - 1 - i, 1 }; // 아래에서부터 출력
+		set_color(15);
+		gotoxy(command_print_pos);
+		printf("%s\n", sys_msg[i]); // sys_msg 배열의 내용을 출력
+	}
 }
 
-void info_print_line3(char ch[100]) {
-	POSITION info_line3_pos = { 6, MAP_WIDTH + 1 };
+void command_print(char ch[100], int line) {
+	POSITION command_print_pos = { MAP_HEIGHT + (2 * line), MAP_WIDTH + 1 };
 	set_color(15);
-	gotoxy(info_line3_pos);
-	printf("%s", ch);
-}
-
-void info_print_line4(char ch[100]) {
-	POSITION info_line4_pos = { 8, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line4_pos);
-	printf("%s", ch);
-}
-
-void info_print_line5(char ch[100]) {
-	POSITION info_line5_pos = { 10, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line5_pos);
-	printf("%s", ch);
-}
-
-void info_print_line6(char ch[100]) {
-	POSITION info_line6_pos = { 12, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line6_pos);
-	printf("%s", ch);
-}
-
-void info_print_line7(char ch[100]) {
-	POSITION info_line7_pos = { 14, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line7_pos);
-	printf("%s", ch);
-}
-
-void info_print_line8(char ch[100]) {
-	POSITION info_line8_pos = { 16, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line8_pos);
-	printf("%s", ch);
-}
-
-void command_print_line1(char ch[100]) {
-	POSITION command_line1_pos = { MAP_HEIGHT + 2, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(command_line1_pos);
-	printf("%s", ch);
-}
-
-void command_print_line2(char ch[100]) {
-	POSITION command_line2_pos = { MAP_HEIGHT + 4, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(command_line2_pos);
-	printf("%s", ch);
-}
-
-void command_print_line3(char ch[100]) {
-	POSITION command_line3_pos = { MAP_HEIGHT + 6, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(command_line3_pos);
+	gotoxy(command_print_pos);
 	printf("%s", ch);
 }
 
@@ -110,6 +64,12 @@ KEY get_key(void) {
 	int byte = _getch();    // 입력된 키를 전달 받기
 	switch (byte) {
 	case 'q': return k_quit;  // 'q'를 누르면 종료
+	case 'H':
+	case 'h':
+		return k_h;
+	case 'M':
+	case 'm':
+		return k_m;
 	case 224:
 		byte = _getch();  // MSB 224가 입력 되면 1바이트 더 전달 받기
 		switch (byte) {

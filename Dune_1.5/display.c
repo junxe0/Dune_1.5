@@ -57,6 +57,8 @@ void display(
 	display_commands(command);
 }
 
+/* ================= UI =================== */
+// 자원 정보
 void display_resource(RESOURCE resource) {
 	set_color(COLOR_RESOURCE);
 	gotoxy(resource_pos);
@@ -65,8 +67,7 @@ void display_resource(RESOURCE resource) {
 		resource.population, resource.population_max
 	);
 }
-
-// subfunction of draw_map()
+// 맵
 void project(char src[N_LAYER][MAP_HEIGHT][MAP_WIDTH], char dest[MAP_HEIGHT][MAP_WIDTH]) {
 	for (int i = 0; i < MAP_HEIGHT; i++) {
 		for (int j = 0; j < MAP_WIDTH; j++) {
@@ -101,7 +102,6 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 		}
 	}
 }
-
 // frontbuf[][]에서 커서 위치의 문자를 색만 바꿔서 그대로 다시 출력
 void display_cursor(CURSOR cursor) {
 	POSITION prev = cursor.previous;
@@ -128,7 +128,6 @@ void display_cursor(CURSOR cursor) {
 		printc(padd(map_pos, curr), ch, COLOR_CURSOR);
 	}
 }
-
 // 상태창
 void project2(char src[OB_INFO_HEIGHT][OB_INFO_WIDTH], char dest[OB_INFO_HEIGHT][OB_INFO_WIDTH]) {
 	for (int i = 0; i < OB_INFO_HEIGHT; i++) {
@@ -152,7 +151,6 @@ void display_object_info(char ob_info[OB_INFO_HEIGHT][OB_INFO_WIDTH]) {
 		}
 	}
 }
-
 // 시스템 메시지
 void project3(char src[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH], char dest[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_WIDTH]) {
 	for (int i = 0; i < SYS_MESSAGE_HEIGHT; i++) {
@@ -176,7 +174,6 @@ void display_system_message(char system_message[SYS_MESSAGE_HEIGHT][SYS_MESSAGE_
 		}
 	}
 }
-
 // 명령창
 void project4(char src[COMMAND_HEIGHT][COMMAND_WIDTH], char dest[COMMAND_HEIGHT][COMMAND_WIDTH]) {
 	for (int i = 0; i < COMMAND_HEIGHT; i++) {
