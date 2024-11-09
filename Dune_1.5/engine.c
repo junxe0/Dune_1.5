@@ -335,7 +335,7 @@ void clear_info(void) {
 }
 
 void clear_command(void) {
-	for (int i = 1; i < 3; i++) {
+	for (int i = 1; i <= 3; i++) {
 		command_print("                                    \n", i);
 	}
 }
@@ -362,7 +362,7 @@ void intro(void) {
 		}
 	}
 	for (int j = 1; j < 22; j += 2) {
-		int loading_ms = rand() % 10 + 30; // 원래 700 + 300
+		int loading_ms = rand() % 701 + 300; // 원래 700 + 300
 		POSITION pos = { 4, j };
 		gotoxy(pos);
 		Sleep(loading_ms);
