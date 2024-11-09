@@ -97,8 +97,8 @@ int command_key = 0;
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
 	// 스파이스
-	.spice = 0,
-	.spice_max = 0,
+	.spice = 5,
+	.spice_max = 10,
 	// 인구
 	.population = 0,
 	.population_max = 0
@@ -180,28 +180,32 @@ int main(void) {
 		}
 		else if (key == k_h) {
 			if (command_key == 1) {
-				sys_msg_print("수확하기 8번에서 추가 ( 아직 미구현 )");
+				sys_msg_print("수확하기 8번에서 추가 ( 미구현 )           ");
+				command_key = 0;
 			}
 			else if (command_key == 2) {
-				POSITION pos = { 1, 14 };
+				POSITION pos = { 14, 1 };
 				if (5 <= resource.spice) {
 					if (map[1][pos.row][pos.column] == 'X') {
-						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.");
+						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.   ");
 					}
 					else {
 						sys_msg_print("A new harvester ready                               ");
 						resource.spice -= 5;
 						add_b_harvester();
 					}
+					command_key = 0;
 				}
 				else {
 					sys_msg_print("Not enough spice                               ");
+					command_key = 0;
 				}
 			}
 		}
 		else if (key == k_m) {
 			if (command_key == 1) {
-				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
+				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )        ");
+				command_key = 0;
 			}
 		}
 		else if (key == k_esc) {
@@ -293,7 +297,6 @@ void get_info(POSITION pos) {
 		info_print("설명 : 건물 짓기 전에 깔기\n", 2);
 		info_print("건설 비용 : 1\n", 3);
 		info_print("내구도 : 없음\n", 4);
-		command_print("명령어 : 없음\n", 1);
 		break;
 	case 'R':
 		info_print("선택된 오브젝트 : 바위\n", 1);
@@ -602,7 +605,7 @@ void add_b_harvester(void) {
 	bh_pos[bh_count - 1][0] = 1;
 	bh_pos[bh_count - 1][1] = 14;
 
-	POSITION pos = { 1, 14 };
+	POSITION pos = { 14, 1 };
 	map[1][pos.row][pos.column] = 'X';
 }
 
@@ -746,7 +749,7 @@ void sandworm_move(void) {
 		return; // 아직 이동할 시간이 아님
 	}
 	POSITION next_pos = sandworm_next_position();
-	if (sys_clock <= sandworm1.last_attack_time + sandworm1.next_attack_time &&\
+	if (sys_clock < sandworm1.last_attack_time + sandworm1.next_attack_time &&\
 		(map[1][next_pos.row][next_pos.column] == 'X' || map[1][next_pos.row][next_pos.column] == 'Y')) {
 		return;
 	}
@@ -888,7 +891,7 @@ void sandworm2_move(void) {
 	}
 
 	POSITION next_pos = sandworm2_next_position();
-	if (sys_clock <= sandworm2.last_attack_time + sandworm2.next_attack_time && \
+	if (sys_clock < sandworm2.last_attack_time + sandworm2.next_attack_time && \
 		(map[1][next_pos.row][next_pos.column] == 'X' || map[1][next_pos.row][next_pos.column] == 'Y')) {
 		return;
 	}
