@@ -97,8 +97,8 @@ int command_key = 0;
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
 	// 스파이스
-	.spice = 5,
-	.spice_max = 10,
+	.spice = 0,
+	.spice_max = 0,
 	// 인구
 	.population = 0,
 	.population_max = 0
