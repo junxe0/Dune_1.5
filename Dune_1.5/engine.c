@@ -189,13 +189,13 @@ int main(void) {
 						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.");
 					}
 					else {
-						sys_msg_print("A new harvester ready");
+						sys_msg_print("A new harvester ready                               ");
 						resource.spice -= 5;
 						add_b_harvester();
 					}
 				}
 				else {
-					sys_msg_print("Not enough spice");
+					sys_msg_print("Not enough spice                               ");
 				}
 			}
 		}
