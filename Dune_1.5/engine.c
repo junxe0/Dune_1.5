@@ -203,12 +203,12 @@ int main(void) {
 			get_info(cursor.current);
 		}
 		else if (key == k_h) {
-			if (command_key == 1) {
+			if (command_key == 2) {
 				sys_msg_print("수확하기 8번에서 추가 ( 미구현 )");
 				command_key = 0;
 				build_key = 0;
 			}
-			else if (command_key == 2) {
+			else if (command_key == 3) {
 				POSITION pos = { 14, 1 };
 				if (5 <= resource.spice) {
 					if (map[1][pos.row][pos.column] == 'X') {
@@ -230,7 +230,7 @@ int main(void) {
 			}
 		}
 		else if (key == k_m) {
-			if (command_key == 1) {
+			if (command_key == 2) {
 				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
 				command_key = 0;
 				build_key = 0;
@@ -317,7 +317,7 @@ void get_info(POSITION pos) {
 	char ch1 = map[1][pos.row][pos.column];
 	clear_info();
 	clear_command();
-	command_key = 0;
+	command_key = 1;
 	switch (ch0) {
 	case ' ':
 		switch (ch1) {
@@ -345,7 +345,7 @@ void get_info(POSITION pos) {
 			switch (ch1) {
 			case 'X':
 				command_print("명령어 : H ( Harvest ), M ( Move )\n", 1);
-				command_key = 1;
+				command_key = 2;
 			default:
 				break;
 			}
@@ -363,7 +363,7 @@ void get_info(POSITION pos) {
 		switch (ch0) {
 		case 'A':
 			command_print("명령어 : H ( 하베스터 생산 )\n", 1);
-			command_key = 2;
+			command_key = 3;
 		default:
 			break;
 		}
