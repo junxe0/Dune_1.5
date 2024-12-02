@@ -121,8 +121,8 @@ int build_key = 0;
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
 	// 스파이스
-	.spice = 0,
-	.spice_max = 0,
+	.spice = 6,
+	.spice_max = 10,
 	// 인구
 	.population = 0,
 	.population_max = 0
@@ -216,6 +216,18 @@ int main(void) {
 				add_b_plate();
 				command_print("명령어 : B ( Build )\n", 1);
 			}
+			else if (build_key == 4) {
+				add_dormitory();
+				command_print("명령어 : B ( Build )\n", 1);
+			}
+			else if (build_key == 5) {
+				add_garage();
+				command_print("명령어 : B ( Build )\n", 1);
+			}
+			else if (build_key == 6) {
+				add_shelter();
+				command_print("명령어 : B ( Build )\n", 1);
+			}
 			else {
 				get_info(cursor.current);
 			}
@@ -302,7 +314,7 @@ int main(void) {
 			clear_info();
 			clear_command();
 			command_print("명령어 : B ( Build )\n", 1);
-			if (build_key == 2) {
+			if (build_key >= 2) {
 				sys_msg_print("건설 선택을 취소하셨습니다.");
 			}
 			command_key = 0;
