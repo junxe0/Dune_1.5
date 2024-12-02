@@ -236,8 +236,6 @@ int main(void) {
 		else if (key == k_h) {
 			if (command_key == 2) {
 				sys_msg_print("수확하기 8번에서 추가 ( 미구현 )");
-				command_key = 0;
-				build_key = 0;
 			}
 			else if (command_key == 3) {
 				POSITION pos = { 14, 1 };
@@ -250,31 +248,29 @@ int main(void) {
 						resource.spice -= 5;
 						add_b_harvester();
 					}
-					command_key = 0;
-					build_key = 0;
 				}
 				else {
 					sys_msg_print("Not enough spice");
-					command_key = 0;
-					build_key = 0;
 				}
 			}
+			command_key = 0;
+			build_key = 0;
 		}
 		else if (key == k_m) {
 			if (command_key == 2) {
 				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
-				command_key = 0;
-				build_key = 0;
 			}
+			command_key = 0;
+			build_key = 0;
 		}
 		else if (key == k_b) {
 			if (command_key == 0 && build_key == 0) {
+				build_key = 1;
 				clear_info();
 				clear_command();
 				command_print("건설 가능한 건물 목록\n", 1);
 				command_print("장판 : P, 숙소 : D, 창고 : G\n", 2);
 				command_print("병영 : B, 은신처 : S\n", 3);
-				build_key = 1;
 			}
 			else if (command_key == 0 && build_key == 1) {
 				build_key = 2;
