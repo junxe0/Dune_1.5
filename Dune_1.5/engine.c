@@ -401,6 +401,34 @@ void get_info(POSITION pos) {
 			break;
 		}
 		break;
+	case 'D':
+		info_print("선택된 오브젝트 : 숙소\n", 1);
+		info_print("설명 : 인구 최대치 증가 ( 1.0 )\n", 2);
+		info_print("건설 비용 : 2\n", 3);
+		info_print("내구도 : 10\n", 4);
+		command_print("명령어 : 없음\n", 1);
+		break;
+	case 'G':
+		info_print("선택된 오브젝트 : 창고\n", 1);
+		info_print("설명 : 스파이스 보관 최대치 증가 ( 1.0 )\n", 2);
+		info_print("건설 비용 : 4\n", 3);
+		info_print("내구도 : 10\n", 4);
+		command_print("명령어 : 없음\n", 1);
+		break;
+	case 'C':
+		info_print("선택된 오브젝트 : 병영\n", 1);
+		info_print("설명 : 보병 생산\n", 2);
+		info_print("건설 비용 : 4\n", 3);
+		info_print("내구도 : 20\n", 4);
+		command_print("명령어 : S ( 보병 생산 )\n", 1);
+		break;
+	case 'S':
+		info_print("선택된 오브젝트 : 은신처\n", 1);
+		info_print("설명 : 특수 유닛 생산\n", 2);
+		info_print("건설 비용 : 5\n", 3);
+		info_print("내구도 : 30\n", 4);
+		command_print("명령어 : F ( 프레멘 생산 )\n", 1);
+		break;
 	default:
 		break;
 	}
