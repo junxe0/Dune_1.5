@@ -25,6 +25,9 @@ POSITION sandworm2_next_position(void);
 void add_b_plate(void);
 void remove_b_plate(void);
 void add_barracks(void);
+void add_dormitory(void);
+void add_garage(void);
+void add_shelter(void);
 
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
@@ -1139,37 +1142,42 @@ void add_b_plate(void) {
 	POSITION pos2 = { curr.row + 1, curr.column };
 	POSITION pos3 = { curr.row, curr.column + 1 };
 	POSITION pos4 = { curr.row + 1, curr.column + 1 };
+	if (1 <= resource.spice) {
+		if (map[0][pos1.row][pos1.column] == ' ' &&
+			map[0][pos2.row][pos2.column] == ' ' &&
+			map[0][pos3.row][pos3.column] == ' ' &&
+			map[0][pos4.row][pos4.column] == ' ') {
+			bplate_count++;
+			resource.spice -= 1;
 
-	if (map[0][pos1.row][pos1.column] == ' ' &&
-		map[0][pos2.row][pos2.column] == ' ' &&
-		map[0][pos3.row][pos3.column] == ' ' &&
-		map[0][pos4.row][pos4.column] == ' ') {
-		bplate_count++;
+			// 오른쪽 아래
+			bplate_pos[(bplate_count * 4) - 4][0] = pos4.row;
+			bplate_pos[(bplate_count * 4) - 4][1] = pos4.column;
+			map[0][pos4.row][pos4.column] = 'P';
 
-		// 오른쪽 아래
-		bplate_pos[(bplate_count * 4) - 4][0] = pos4.row;
-		bplate_pos[(bplate_count * 4) - 4][1] = pos4.column;
-		map[0][pos4.row][pos4.column] = 'P';
+			// 오른쪽 위
+			bplate_pos[(bplate_count * 4) - 3][0] = pos3.row;
+			bplate_pos[(bplate_count * 4) - 3][1] = pos3.column;
+			map[0][pos3.row][pos3.column] = 'P';
 
-		// 오른쪽 위
-		bplate_pos[(bplate_count * 4) - 3][0] = pos3.row;
-		bplate_pos[(bplate_count * 4) - 3][1] = pos3.column;
-		map[0][pos3.row][pos3.column] = 'P';
+			// 왼쪽 아래
+			bplate_pos[(bplate_count * 4) - 2][0] = pos2.row;
+			bplate_pos[(bplate_count * 4) - 2][1] = pos2.column;
+			map[0][pos2.row][pos2.column] = 'P';
 
-		// 왼쪽 아래
-		bplate_pos[(bplate_count * 4) - 2][0] = pos2.row;
-		bplate_pos[(bplate_count * 4) - 2][1] = pos2.column;
-		map[0][pos2.row][pos2.column] = 'P';
+			// 왼쪽 위
+			bplate_pos[(bplate_count * 4) - 1][0] = pos1.row;
+			bplate_pos[(bplate_count * 4) - 1][1] = pos1.column;
+			map[0][pos1.row][pos1.column] = 'P';
 
-		// 왼쪽 위
-		bplate_pos[(bplate_count * 4) - 1][0] = pos1.row;
-		bplate_pos[(bplate_count * 4) - 1][1] = pos1.column;
-		map[0][pos1.row][pos1.column] = 'P';
-
-		sys_msg_print("장판 건설이 완료되었습니다.");
+			sys_msg_print("장판 건설이 완료되었습니다.");
+		}
+		else {
+			sys_msg_print("해당 위치에 오브젝트가 존재합니다.");
+		}
 	}
 	else {
-		sys_msg_print("해당 위치에 오브젝트가 존재합니다.");
+		sys_msg_print("보유 중인 스파이스가 1 보다 적습니다.");
 	}
 	build_key = 0;
 }
@@ -1214,38 +1222,196 @@ void add_barracks(void) {
 	POSITION pos3 = { curr.row, curr.column + 1 };
 	POSITION pos4 = { curr.row + 1, curr.column + 1 };
 
-	if (map[0][pos1.row][pos1.column] == 'P' &&
-		map[0][pos2.row][pos2.column] == 'P' &&
-		map[0][pos3.row][pos3.column] == 'P' &&
-		map[0][pos4.row][pos4.column] == 'P') {
-		barracks_count++;
+	if (4 <= resource.spice) {
+		if (map[0][pos1.row][pos1.column] == 'P' &&
+			map[0][pos2.row][pos2.column] == 'P' &&
+			map[0][pos3.row][pos3.column] == 'P' &&
+			map[0][pos4.row][pos4.column] == 'P') {
+			barracks_count++;
+			resource.spice -= 4;
 
-		remove_b_plate();
+			remove_b_plate();
 
-		// 오른쪽 아래
-		barracks_pos[(barracks_count * 4) - 4][0] = pos4.row;
-		barracks_pos[(barracks_count * 4) - 4][1] = pos4.column;
-		map[0][pos4.row][pos4.column] = 'D';
+			// 오른쪽 아래
+			barracks_pos[(barracks_count * 4) - 4][0] = pos4.row;
+			barracks_pos[(barracks_count * 4) - 4][1] = pos4.column;
+			map[0][pos4.row][pos4.column] = 'C';
 
-		// 오른쪽 위
-		barracks_pos[(barracks_count * 4) - 3][0] = pos3.row;
-		barracks_pos[(barracks_count * 4) - 3][1] = pos3.column;
-		map[0][pos3.row][pos3.column] = 'D';
+			// 오른쪽 위
+			barracks_pos[(barracks_count * 4) - 3][0] = pos3.row;
+			barracks_pos[(barracks_count * 4) - 3][1] = pos3.column;
+			map[0][pos3.row][pos3.column] = 'C';
 
-		// 왼쪽 아래
-		barracks_pos[(barracks_count * 4) - 2][0] = pos2.row;
-		barracks_pos[(barracks_count * 4) - 2][1] = pos2.column;
-		map[0][pos2.row][pos2.column] = 'D';
+			// 왼쪽 아래
+			barracks_pos[(barracks_count * 4) - 2][0] = pos2.row;
+			barracks_pos[(barracks_count * 4) - 2][1] = pos2.column;
+			map[0][pos2.row][pos2.column] = 'C';
 
-		// 왼쪽 위
-		barracks_pos[(barracks_count * 4) - 1][0] = pos1.row;
-		barracks_pos[(barracks_count * 4) - 1][1] = pos1.column;
-		map[0][pos1.row][pos1.column] = 'D';
+			// 왼쪽 위
+			barracks_pos[(barracks_count * 4) - 1][0] = pos1.row;
+			barracks_pos[(barracks_count * 4) - 1][1] = pos1.column;
+			map[0][pos1.row][pos1.column] = 'C';
 
-		sys_msg_print("병영 건설이 완료되었습니다.");
+			sys_msg_print("병영 건설이 완료되었습니다.");
+		}
+		else {
+			sys_msg_print("해당 위치에 장판이 없습니다.");
+		}
 	}
 	else {
-		sys_msg_print("해당 위치에 장판이 없습니다.");
+		sys_msg_print("보유 중인 스파이스가 4 보다 적습니다.");
+	}
+	build_key = 0;
+}
+
+/* ================= 숙소 =================== */
+void add_dormitory(void) {
+	POSITION curr = cursor.current;
+	
+	POSITION pos1 = { curr.row, curr.column };
+	POSITION pos2 = { curr.row + 1, curr.column };
+	POSITION pos3 = { curr.row, curr.column + 1 };
+	POSITION pos4 = { curr.row + 1, curr.column + 1 };
+	if (2 <= resource.spice) {
+		if (map[0][pos1.row][pos1.column] == 'P' &&
+			map[0][pos2.row][pos2.column] == 'P' &&
+			map[0][pos3.row][pos3.column] == 'P' &&
+			map[0][pos4.row][pos4.column] == 'P') {
+			dormitory_count++;
+			resource.spice -= 2;
+
+			remove_b_plate();
+
+			// 오른쪽 아래
+			dormitory_pos[(dormitory_count * 4) - 4][0] = pos4.row;
+			dormitory_pos[(dormitory_count * 4) - 4][1] = pos4.column;
+			map[0][pos4.row][pos4.column] = 'D';
+
+			// 오른쪽 위
+			dormitory_pos[(dormitory_count * 4) - 3][0] = pos3.row;
+			dormitory_pos[(dormitory_count * 4) - 3][1] = pos3.column;
+			map[0][pos3.row][pos3.column] = 'D';
+
+			// 왼쪽 아래
+			dormitory_pos[(dormitory_count * 4) - 2][0] = pos2.row;
+			dormitory_pos[(dormitory_count * 4) - 2][1] = pos2.column;
+			map[0][pos2.row][pos2.column] = 'D';
+
+			// 왼쪽 위
+			dormitory_pos[(dormitory_count * 4) - 1][0] = pos1.row;
+			dormitory_pos[(dormitory_count * 4) - 1][1] = pos1.column;
+			map[0][pos1.row][pos1.column] = 'D';
+
+			sys_msg_print("숙소 건설이 완료되었습니다.");
+		}
+		else {
+			sys_msg_print("해당 위치에 장판이 없습니다.");
+		}
+	}
+	else {
+		sys_msg_print("보유 중인 스파이스가 2 보다 적습니다.");
+	}
+	build_key = 0;
+}
+
+/* ================= 창고 =================== */
+void add_garage(void) {
+	POSITION curr = cursor.current;
+
+	POSITION pos1 = { curr.row, curr.column };
+	POSITION pos2 = { curr.row + 1, curr.column };
+	POSITION pos3 = { curr.row, curr.column + 1 };
+	POSITION pos4 = { curr.row + 1, curr.column + 1 };
+
+	if (4 <= resource.spice) {
+		if (map[0][pos1.row][pos1.column] == 'P' &&
+			map[0][pos2.row][pos2.column] == 'P' &&
+			map[0][pos3.row][pos3.column] == 'P' &&
+			map[0][pos4.row][pos4.column] == 'P') {
+			garage_count++;
+			resource.spice -= 4;
+
+			remove_b_plate();
+
+			// 오른쪽 아래
+			garage_pos[(garage_count * 4) - 4][0] = pos4.row;
+			garage_pos[(garage_count * 4) - 4][1] = pos4.column;
+			map[0][pos4.row][pos4.column] = 'G';
+
+			// 오른쪽 위
+			garage_pos[(garage_count * 4) - 3][0] = pos3.row;
+			garage_pos[(garage_count * 4) - 3][1] = pos3.column;
+			map[0][pos3.row][pos3.column] = 'G';
+
+			// 왼쪽 아래
+			garage_pos[(garage_count * 4) - 2][0] = pos2.row;
+			garage_pos[(garage_count * 4) - 2][1] = pos2.column;
+			map[0][pos2.row][pos2.column] = 'G';
+
+			// 왼쪽 위
+			garage_pos[(garage_count * 4) - 1][0] = pos1.row;
+			garage_pos[(garage_count * 4) - 1][1] = pos1.column;
+			map[0][pos1.row][pos1.column] = 'G';
+
+			sys_msg_print("창고 건설이 완료되었습니다.");
+		}
+		else {
+			sys_msg_print("해당 위치에 장판이 없습니다.");
+		}
+	}
+	else {
+		sys_msg_print("보유 중인 스파이스가 4 보다 적습니다.");
+	}
+	build_key = 0;
+}
+
+/* ================= 은신처 =================== */
+void add_shelter(void) {
+	POSITION curr = cursor.current;
+
+	POSITION pos1 = { curr.row, curr.column };
+	POSITION pos2 = { curr.row + 1, curr.column };
+	POSITION pos3 = { curr.row, curr.column + 1 };
+	POSITION pos4 = { curr.row + 1, curr.column + 1 };
+
+	if (5 <= resource.spice) {
+		if (map[0][pos1.row][pos1.column] == 'P' &&
+			map[0][pos2.row][pos2.column] == 'P' &&
+			map[0][pos3.row][pos3.column] == 'P' &&
+			map[0][pos4.row][pos4.column] == 'P') {
+			shelter_count++;
+			resource.spice -= 5;
+
+			remove_b_plate();
+
+			// 오른쪽 아래
+			shelter_pos[(shelter_count * 4) - 4][0] = pos4.row;
+			shelter_pos[(shelter_count * 4) - 4][1] = pos4.column;
+			map[0][pos4.row][pos4.column] = 'S';
+
+			// 오른쪽 위
+			shelter_pos[(shelter_count * 4) - 3][0] = pos3.row;
+			shelter_pos[(shelter_count * 4) - 3][1] = pos3.column;
+			map[0][pos3.row][pos3.column] = 'S';
+
+			// 왼쪽 아래
+			shelter_pos[(shelter_count * 4) - 2][0] = pos2.row;
+			shelter_pos[(shelter_count * 4) - 2][1] = pos2.column;
+			map[0][pos2.row][pos2.column] = 'S';
+
+			// 왼쪽 위
+			shelter_pos[(shelter_count * 4) - 1][0] = pos1.row;
+			shelter_pos[(shelter_count * 4) - 1][1] = pos1.column;
+			map[0][pos1.row][pos1.column] = 'S';
+
+			sys_msg_print("은신처 건설이 완료되었습니다.");
+		}
+		else {
+			sys_msg_print("해당 위치에 장판이 없습니다.");
+		}
+	}
+	else {
+		sys_msg_print("보유 중인 스파이스가 5 보다 적습니다.");
 	}
 	build_key = 0;
 }
