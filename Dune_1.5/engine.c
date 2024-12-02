@@ -22,6 +22,9 @@ void sandworm_move(void);
 void sandworm2_move(void);
 POSITION sandworm_next_position(void);
 POSITION sandworm2_next_position(void);
+void add_b_plate(void);
+void remove_b_plate(void);
+void add_barracks(void);
 
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
@@ -59,6 +62,8 @@ int rplate_pos[][2] = {
 	{55, 2},
 	{56, 1}
 };
+int bplate_count = 1;
+int rplate_count = 1;
 // 바위
 int rock_pos[][2] = {
 	{50, 8},
@@ -87,21 +92,25 @@ int bharvestor_pos[MAX_HARVESTERS][2] = {
 int rharvestor_pos[MAX_HARVESTERS][2] = {
 	{58, 3}
 };
-int bh_count = 1;
-int rh_count = 1;
+int bharvestor_count = 1;
+int rharvestor_count = 1;
 // 샌드웜
 int sandworm1_r = 0;
 int sandworm1_r_avoid = 0;
 int sandworm2_r = 0;
 int sandworm2_r_avoid = 0;
 // 숙소
-int dormitory_pos[][2] = { -1 };
+int dormitory_pos[][2] = { 0 };
+int dormitory_count = 0;
 // 창고
-int garage_pos[][2] = { -1 };
+int garage_pos[][2] = { 0 };
+int garage_count = 0;
 // 병영
-int barracks_pos[][2] = { -1 };
+int barracks_pos[][2] = { 0 };
+int barracks_count = 0;
 // 은신처
-int shelter_pos[][2] = { -1 };
+int shelter_pos[][2] = { 0 };
+int shelter_count = 0;
 // 명령어
 int command_key = 0;
 int build_key = 0;
@@ -165,14 +174,14 @@ int main(void) {
 	int press_count = 0;
 	int last_sys_clock = 0;
 
-	command_print("명령어 : B : ( Build )\n", 1);
+	command_print("명령어 : B ( Build )\n", 1);
 
 	while (1) {
 		// loop 돌 때마다(즉, TICK==10ms마다) 키 입력 확인
 		KEY key = get_key();
 
 		if (is_arrow_key(key)) {
-			if (build_key == 2) {
+			if (build_key >= 2) {
 				cursor_size = 2;
 			}
 			else {
@@ -197,10 +206,17 @@ int main(void) {
 		}
 		else if (key == k_space) {
 			if (build_key == 2) {
-				sys_msg_print("건설 선택을 취소하셨습니다.");
+				add_barracks();
+				command_print("명령어 : B ( Build )\n", 1);
+			}
+			else if (build_key == 3) {
+				add_b_plate();
+				command_print("명령어 : B ( Build )\n", 1);
+			}
+			else {
+				get_info(cursor.current);
 			}
 			build_key = 0;
-			get_info(cursor.current);
 		}
 		else if (key == k_h) {
 			if (command_key == 2) {
@@ -253,28 +269,28 @@ int main(void) {
 		}
 		else if (key == k_p) {
 			if (command_key == 0 && build_key == 1) {
-				build_key = 2;
+				build_key = 3;
 				clear_command();
 				sys_msg_print("장판 건설을 선택하셨습니다.");
 			}
 		}
 		else if (key == k_d) {
 			if (command_key == 0 && build_key == 1) {
-				build_key = 2;
+				build_key = 4;
 				clear_command();
 				sys_msg_print("숙소 건설을 선택하셨습니다.");
 			}
 		}
 		else if (key == k_g) {
 			if (command_key == 0 && build_key == 1) {
-				build_key = 2;
+				build_key = 5;
 				clear_command();
 				sys_msg_print("창고 건설을 선택하셨습니다.");
 			}
 		}
 		else if (key == k_s) {
 			if (command_key == 0 && build_key == 1) {
-				build_key = 2;
+				build_key = 6;
 				clear_command();
 				sys_msg_print("은신처 건설을 선택하셨습니다.");
 			}
@@ -282,7 +298,7 @@ int main(void) {
 		else if (key == k_esc) {
 			clear_info();
 			clear_command();
-			command_print("명령어 : B : ( Build )\n", 1);
+			command_print("명령어 : B ( Build )\n", 1);
 			if (build_key == 2) {
 				sys_msg_print("건설 선택을 취소하셨습니다.");
 			}
@@ -607,37 +623,37 @@ void init(void) {
 		map[0][i][j] = 'B';
 	}
 	// 아군 장판
-	for (int k = 0; k < sizeof(bplate_pos) / sizeof(bplate_pos[0]); k++) {
+	for (int k = 0; k < bplate_count * 4; k++) {
 		int j = bplate_pos[k][0];
 		int i = bplate_pos[k][1];
 		map[0][i][j] = 'P';
 	}
 	// 적군 장판
-	for (int k = 0; k < sizeof(rplate_pos) / sizeof(rplate_pos[0]); k++) {
+	for (int k = 0; k < rplate_count * 4; k++) {
 		int j = rplate_pos[k][0];
 		int i = rplate_pos[k][1];
 		map[0][i][j] = 'P';
 	}
 	// 아군 숙소
-	for (int k = 0; k < sizeof(dormitory_pos) / sizeof(dormitory_pos[0]); k++) {
+	for (int k = 0; k < dormitory_count; k++) {
 		int j = dormitory_pos[k][0];
 		int i = dormitory_pos[k][1];
 		map[0][i][j] = 'D';
 	}
 	// 아군 창고
-	for (int k = 0; k < sizeof(garage_pos) / sizeof(garage_pos[0]); k++) {
+	for (int k = 0; k < garage_count; k++) {
 		int j = garage_pos[k][0];
 		int i = garage_pos[k][1];
 		map[0][i][j] = 'G';
 	}
 	// 아군 병영
-	for (int k = 0; k < sizeof(barracks_pos) / sizeof(barracks_pos[0]); k++) {
+	for (int k = 0; k < barracks_count; k++) {
 		int j = barracks_pos[k][0];
 		int i = barracks_pos[k][1];
 		map[0][i][j] = 'C';
 	}
 	// 아군 은신처
-	for (int k = 0; k < sizeof(shelter_pos) / sizeof(shelter_pos[0]); k++) {
+	for (int k = 0; k < shelter_count; k++) {
 		int j = shelter_pos[k][0];
 		int i = shelter_pos[k][1];
 		map[0][i][j] = 'S';
@@ -662,13 +678,13 @@ void init(void) {
 		}
 	}
 	// 아군 하베스터
-	for (int k = 0; k < bh_count; k++) {
+	for (int k = 0; k < bharvestor_count; k++) {
 		int j = bharvestor_pos[k][0];
 		int i = bharvestor_pos[k][1];
 		map[1][i][j] = 'X';
 	}
 	// 적군 하베스터
-	for (int k = 0; k < rh_count; k++) {
+	for (int k = 0; k < rharvestor_count; k++) {
 		int j = rharvestor_pos[k][0];
 		int i = rharvestor_pos[k][1];
 		map[1][i][j] = 'Y';
@@ -747,45 +763,45 @@ void cursor_move(DIRECTION dir, int c_count, int cursor_size) {
 
 /* ================= 하베스터 =================== */
 void add_b_harvester(void) {
-	bh_count++; // 하베스터 수 증가
+	bharvestor_count++; // 하베스터 수 증가
 
-	bharvestor_pos[bh_count - 1][0] = 1;
-	bharvestor_pos[bh_count - 1][1] = 14;
+	bharvestor_pos[bharvestor_count - 1][0] = 1;
+	bharvestor_pos[bharvestor_count - 1][1] = 14;
 
 	POSITION pos = { 14, 1 };
 	map[1][pos.row][pos.column] = 'X';
 }
 
 void remove_b_harvester(int index) {
-	if (index < 0 || index >= bh_count) { return; }
+	if (index < 0 || index >= bharvestor_count) { return; }
 
 	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
-	for (int i = index; i < bh_count; i++) {
+	for (int i = index; i < bharvestor_count; i++) {
 		bharvestor_pos[i][0] = bharvestor_pos[i + 1][0];
 		bharvestor_pos[i][1] = bharvestor_pos[i + 1][1];
 	}
 
-	bh_count--; // 하베스터 수 감소
+	bharvestor_count--; // 하베스터 수 감소
 
 	// 마지막 요소를 초기화 (선택 사항)
-	bharvestor_pos[bh_count][0] = -1;
-	bharvestor_pos[bh_count][1] = -1;
+	bharvestor_pos[bharvestor_count][0] = -1;
+	bharvestor_pos[bharvestor_count][1] = -1;
 }
 
 void remove_r_harvester(int index) {
-	if (index < 0 || index >= rh_count) { return; }
+	if (index < 0 || index >= rharvestor_count) { return; }
 
 	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
-	for (int i = index; i < rh_count; i++) {
+	for (int i = index; i < rharvestor_count; i++) {
 		rharvestor_pos[i][0] = rharvestor_pos[i + 1][0];
 		rharvestor_pos[i][1] = rharvestor_pos[i + 1][1];
 	}
 
-	rh_count--; // 하베스터 수 감소
+	rharvestor_count--; // 하베스터 수 감소
 
 	// 마지막 요소를 초기화 (선택 사항)
-	rharvestor_pos[rh_count][0] = -1;
-	rharvestor_pos[rh_count][1] = -1;
+	rharvestor_pos[rharvestor_count][0] = -1;
+	rharvestor_pos[rharvestor_count][1] = -1;
 }
 
 /* ================= 샌드웜 =================== */
@@ -798,7 +814,7 @@ POSITION find_closest_harvester(POSITION sandworm_pos) {
 	POSITION closest_harvester = { -1, -1 };
 
 	// 아군 하베스터 찾기
-	for (int i = 0; i < bh_count; i++) {
+	for (int i = 0; i < bharvestor_count; i++) {
 		POSITION harvesterock_pos = { bharvestor_pos[i][1], bharvestor_pos[i][0] };
 		double distance = calculate_distance(sandworm_pos, harvesterock_pos);
 
@@ -809,7 +825,7 @@ POSITION find_closest_harvester(POSITION sandworm_pos) {
 	}
 
 	// 적군 하베스터 찾기
-	for (int i = 0; i < rh_count; i++) {
+	for (int i = 0; i < rharvestor_count; i++) {
 		POSITION harvesterock_pos = { rharvestor_pos[i][1], rharvestor_pos[i][0] };
 		double distance = calculate_distance(sandworm_pos, harvesterock_pos);
 
@@ -913,7 +929,7 @@ void sandworm_move(void) {
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
 			// 하베스터 좌표 배열에서 해당 하베스터 삭제
-			for (int i = 0; i < bh_count; i++) {
+			for (int i = 0; i < bharvestor_count; i++) {
 				// 좌표 비교
 				if (bharvestor_pos[i][0] == next_pos.column && bharvestor_pos[i][1] == next_pos.row) {
 					remove_b_harvester(i); // 배열에서 삭제
@@ -934,7 +950,7 @@ void sandworm_move(void) {
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
 			// 하베스터 좌표 배열에서 해당 하베스터 삭제
-			for (int i = 0; i < rh_count; i++) {
+			for (int i = 0; i < rharvestor_count; i++) {
 				// 좌표 비교
 				if (rharvestor_pos[i][0] == next_pos.column && rharvestor_pos[i][1] == next_pos.row) {
 					remove_r_harvester(i); // 배열에서 삭제
@@ -1055,7 +1071,7 @@ void sandworm2_move(void) {
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
 			// 하베스터 좌표 배열에서 해당 하베스터 삭제
-			for (int i = 0; i < bh_count; i++) {
+			for (int i = 0; i < bharvestor_count; i++) {
 				// 좌표 비교
 				if (bharvestor_pos[i][0] == next_pos.column && bharvestor_pos[i][1] == next_pos.row) {
 					remove_b_harvester(i); // 배열에서 삭제
@@ -1076,7 +1092,7 @@ void sandworm2_move(void) {
 			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
 
 			// 하베스터 좌표 배열에서 해당 하베스터 삭제
-			for (int i = 0; i < rh_count; i++) {
+			for (int i = 0; i < rharvestor_count; i++) {
 				// 좌표 비교
 				if (rharvestor_pos[i][0] == next_pos.column && rharvestor_pos[i][1] == next_pos.row) {
 					remove_r_harvester(i); // 배열에서 삭제
@@ -1112,4 +1128,124 @@ void sandworm2_move(void) {
 	}
 
 	sandworm2.next_move_time = sys_clock + sandworm2.speed; // 다음 이동 시간 설정
+}
+
+/* ================= 건설 =================== */
+/* ================= 장판 =================== */
+void add_b_plate(void) {
+	POSITION curr = cursor.current;
+
+	POSITION pos1 = { curr.row, curr.column };
+	POSITION pos2 = { curr.row + 1, curr.column };
+	POSITION pos3 = { curr.row, curr.column + 1 };
+	POSITION pos4 = { curr.row + 1, curr.column + 1 };
+
+	if (map[0][pos1.row][pos1.column] == ' ' &&
+		map[0][pos2.row][pos2.column] == ' ' &&
+		map[0][pos3.row][pos3.column] == ' ' &&
+		map[0][pos4.row][pos4.column] == ' ') {
+		bplate_count++;
+
+		// 오른쪽 아래
+		bplate_pos[(bplate_count * 4) - 4][0] = pos4.row;
+		bplate_pos[(bplate_count * 4) - 4][1] = pos4.column;
+		map[0][pos4.row][pos4.column] = 'P';
+
+		// 오른쪽 위
+		bplate_pos[(bplate_count * 4) - 3][0] = pos3.row;
+		bplate_pos[(bplate_count * 4) - 3][1] = pos3.column;
+		map[0][pos3.row][pos3.column] = 'P';
+
+		// 왼쪽 아래
+		bplate_pos[(bplate_count * 4) - 2][0] = pos2.row;
+		bplate_pos[(bplate_count * 4) - 2][1] = pos2.column;
+		map[0][pos2.row][pos2.column] = 'P';
+
+		// 왼쪽 위
+		bplate_pos[(bplate_count * 4) - 1][0] = pos1.row;
+		bplate_pos[(bplate_count * 4) - 1][1] = pos1.column;
+		map[0][pos1.row][pos1.column] = 'P';
+
+		sys_msg_print("장판 건설이 완료되었습니다.");
+	}
+	else {
+		sys_msg_print("해당 위치에 오브젝트가 존재합니다.");
+	}
+	build_key = 0;
+}
+
+void remove_b_plate(void) {
+	POSITION curr = cursor.current;
+
+	// 커서 위치에 기반한 장판 위치 정의
+	POSITION positions[4] = {
+		{ curr.row, curr.column },          // pos1: 현재 위치
+		{ curr.row + 1, curr.column },      // pos2: 아래
+		{ curr.row, curr.column + 1 },      // pos3: 오른쪽
+		{ curr.row + 1, curr.column + 1 }   // pos4: 오른쪽 아래
+	};
+
+	for (int j = 0; j < 4; j++) {
+		// 각 위치에 대해 bplate_pos에서 찾고 삭제
+		for (int i = 0; i < bplate_count * 4; i++) {
+			// 현재 위치와 비교
+			if (bplate_pos[i][0] == positions[j].row && bplate_pos[i][1] == positions[j].column) {
+				// 해당 위치를 삭제하기 위해 남은 요소를 앞으로 이동
+				for (int k = i; k < (bplate_count * 4) - 1; k++) {
+					bplate_pos[k][0] = bplate_pos[k + 1][0];
+					bplate_pos[k][1] = bplate_pos[k + 1][1];
+				}
+				// 마지막 요소 초기화
+				bplate_pos[bplate_count * 4][0] = -1;
+				bplate_pos[bplate_count * 4][1] = -1;
+				break;
+			}
+		}
+	}
+	bplate_count--;
+}
+
+/* ================= 병영 =================== */
+void add_barracks(void) {
+	POSITION curr = cursor.current;
+	
+	POSITION pos1 = { curr.row, curr.column };
+	POSITION pos2 = { curr.row + 1, curr.column };
+	POSITION pos3 = { curr.row, curr.column + 1 };
+	POSITION pos4 = { curr.row + 1, curr.column + 1 };
+
+	if (map[0][pos1.row][pos1.column] == 'P' &&
+		map[0][pos2.row][pos2.column] == 'P' &&
+		map[0][pos3.row][pos3.column] == 'P' &&
+		map[0][pos4.row][pos4.column] == 'P') {
+		barracks_count++;
+
+		remove_b_plate();
+
+		// 오른쪽 아래
+		barracks_pos[(barracks_count * 4) - 4][0] = pos4.row;
+		barracks_pos[(barracks_count * 4) - 4][1] = pos4.column;
+		map[0][pos4.row][pos4.column] = 'D';
+
+		// 오른쪽 위
+		barracks_pos[(barracks_count * 4) - 3][0] = pos3.row;
+		barracks_pos[(barracks_count * 4) - 3][1] = pos3.column;
+		map[0][pos3.row][pos3.column] = 'D';
+
+		// 왼쪽 아래
+		barracks_pos[(barracks_count * 4) - 2][0] = pos2.row;
+		barracks_pos[(barracks_count * 4) - 2][1] = pos2.column;
+		map[0][pos2.row][pos2.column] = 'D';
+
+		// 왼쪽 위
+		barracks_pos[(barracks_count * 4) - 1][0] = pos1.row;
+		barracks_pos[(barracks_count * 4) - 1][1] = pos1.column;
+		map[0][pos1.row][pos1.column] = 'D';
+
+		sys_msg_print("병영 건설이 완료되었습니다.");
+	}
+	else {
+		sys_msg_print("해당 위치에 장판이 없습니다.");
+	}
+	build_key = 0;
 }
