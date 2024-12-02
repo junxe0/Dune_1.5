@@ -430,14 +430,14 @@ void get_info(POSITION pos) {
 		break;
 	case 'D':
 		info_print("선택된 오브젝트 : 숙소\n", 1);
-		info_print("설명 : 인구 최대치 증가 ( 1.0 )\n", 2);
+		info_print("설명 : 인구 최대치 증가 ( 10 )\n", 2);
 		info_print("건설 비용 : 2\n", 3);
 		info_print("내구도 : 10\n", 4);
 		command_print("명령어 : 없음\n", 1);
 		break;
 	case 'G':
 		info_print("선택된 오브젝트 : 창고\n", 1);
-		info_print("설명 : 스파이스 보관 최대치 증가 ( 1.0 )\n", 2);
+		info_print("설명 : 스파이스 보관 최대치 증가 ( 10 )\n", 2);
 		info_print("건설 비용 : 4\n", 3);
 		info_print("내구도 : 10\n", 4);
 		command_print("명령어 : 없음\n", 1);
@@ -1287,7 +1287,7 @@ void add_dormitory(void) {
 			map[0][pos4.row][pos4.column] == 'P') {
 			dormitory_count++;
 			resource.spice -= 2;
-			resource.population_max += 1;
+			resource.population_max += 10;
 
 			remove_b_plate();
 
@@ -1339,7 +1339,7 @@ void add_garage(void) {
 			map[0][pos4.row][pos4.column] == 'P') {
 			garage_count++;
 			resource.spice -= 4;
-			resource.spice_max += 1;
+			resource.spice_max += 10;
 
 			remove_b_plate();
 
