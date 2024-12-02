@@ -121,8 +121,8 @@ int build_key = 0;
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
 	// 스파이스
-	.spice = 6,
-	.spice_max = 10,
+	.spice = 0,
+	.spice_max = 0,
 	// 인구
 	.population = 0,
 	.population_max = 0
@@ -228,7 +228,7 @@ int main(void) {
 				add_shelter();
 				command_print("명령어 : B ( Build )\n", 1);
 			}
-			else {
+			else if (build_key < 1) {
 				get_info(cursor.current);
 			}
 			build_key = 0;
