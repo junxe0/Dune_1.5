@@ -77,6 +77,21 @@ KEY get_key(void) {
 	case 'M':
 	case 'm':
 		return k_m;
+	case 'B':
+	case 'b':
+		return k_b;
+	case 'P':
+	case 'p':
+		return k_p;
+	case 'D':
+	case 'd':
+		return k_d;
+	case 'G':
+	case 'g':
+		return k_g;
+	case 'S':
+	case 's':
+		return k_s;
 	case 224:
 		byte = _getch();  // MSB 224가 입력 되면 1바이트 더 전달 받기
 		switch (byte) {
@@ -92,60 +107,4 @@ KEY get_key(void) {
 		return k_esc;
 	default: return k_undef;
 	}
-}
-
-void test_print_line1(char ch[100], int a, int b) {
-	POSITION info_line1_pos = { 2, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("%s (%03d, %03d)", ch, a, b);
-}
-
-void test_print_line2(char ch[100], int a, int b) {
-	POSITION info_line1_pos = { 4, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("%s (%03d, %03d)", ch, a, b);
-}
-
-void test_print_line3(int a, int b) {
-	POSITION info_line1_pos = { 6, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("sandworm1_r : %03d, sandworm1_r_avoid : %03d)", a, b);
-}
-
-void test_print_line4(int a) {
-	POSITION info_line1_pos = { 8, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("%d번 삭제 완료", a);
-}
-
-void test_print_line5(int a, int b) {
-	POSITION info_line1_pos = { 10, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("하베스터 배열 : %03d, %03d", a, b);
-}
-
-void test_print_line6(char ch[100]) {
-	POSITION info_line1_pos = { 12, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("%s", ch);
-}
-
-void test_print_line7(int a, int b) {
-	POSITION info_line1_pos = { 14, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("하베스트 위치 : %03d, %03d", a, b);
-}
-
-void test_print_line8(int a, int b) {
-	POSITION info_line1_pos = { 16, MAP_WIDTH + 1 };
-	set_color(15);
-	gotoxy(info_line1_pos);
-	printf("W 다음 위치 : %03d, %03d", a, b);
 }

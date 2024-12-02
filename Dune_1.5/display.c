@@ -95,6 +95,12 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 				else if (ch == 'X') { printc(padd(map_pos, pos), 'H', COLOR_USER_HAVESTOR); }
 				else if (ch == 'Y') { printc(padd(map_pos, pos), 'H', COLOR_AI_HAVESTOR); }
 				else if (ch == 'W') { printc(padd(map_pos, pos), ch, COLOR_SANDWORM); }
+
+				else if (ch == 'D') { printc(padd(map_pos, pos), ch, COLOR_DORMITORY); }
+				else if (ch == 'G') { printc(padd(map_pos, pos), ch, COLOR_GARAGE); }
+				else if (ch == 'C') { printc(padd(map_pos, pos), 'B', COLOR_BARRACKS); }
+				else if (ch == 'S') { printc(padd(map_pos, pos), ch, COLOR_SHELTER); }
+
 				else if (ch == '#') { printc(padd(map_pos, pos), ch, COLOR_DEFAULT); }
 				else { printc(padd(map_pos, pos), ch, COLOR_OTHER); }
 			}
@@ -116,6 +122,10 @@ void display_cursor(CURSOR cursor) {
 	else if (ch == 'X') { printc(padd(map_pos, prev), 'H', COLOR_USER_HAVESTOR); }
 	else if (ch == 'Y') { printc(padd(map_pos, prev), 'H', COLOR_AI_HAVESTOR); }
 	else if (ch == 'W') { printc(padd(map_pos, prev), ch, COLOR_SANDWORM); }
+	else if (ch == 'D') { printc(padd(map_pos, prev), ch, COLOR_DORMITORY); }
+	else if (ch == 'G') { printc(padd(map_pos, prev), ch, COLOR_GARAGE); }
+	else if (ch == 'C') { printc(padd(map_pos, prev), 'B', COLOR_BARRACKS); }
+	else if (ch == 'S') { printc(padd(map_pos, prev), ch, COLOR_SHELTER); }
 	else if (ch == '#') { printc(padd(map_pos, prev), ch, COLOR_DEFAULT); }
 	else { printc(padd(map_pos, prev), ch, COLOR_OTHER); }
 
@@ -124,6 +134,7 @@ void display_cursor(CURSOR cursor) {
 	else if (ch == 'B') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
 	else if (ch == 'X') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
 	else if (ch == 'Y') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
+	else if (ch == 'C') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
 	else {
 		printc(padd(map_pos, curr), ch, COLOR_CURSOR);
 	}

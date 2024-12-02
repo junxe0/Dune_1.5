@@ -21,6 +21,10 @@
 #define COLOR_USER_HAVESTOR 31
 #define COLOR_AI_HAVESTOR 79
 #define COLOR_SANDWORM 111
+#define COLOR_DORMITORY 63
+#define COLOR_GARAGE 95
+#define COLOR_BARRACKS 47
+#define COLOR_SHELTER 191
 #define COLOR_OTHER 112
 
 // 지금은 자원, 맵, 커서만 표시
