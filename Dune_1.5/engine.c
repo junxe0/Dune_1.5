@@ -180,31 +180,31 @@ int main(void) {
 		}
 		else if (key == k_h) {
 			if (command_key == 1) {
-				sys_msg_print("수확하기 8번에서 추가 ( 미구현 )           ");
+				sys_msg_print("수확하기 8번에서 추가 ( 미구현 )");
 				command_key = 0;
 			}
 			else if (command_key == 2) {
 				POSITION pos = { 14, 1 };
 				if (5 <= resource.spice) {
 					if (map[1][pos.row][pos.column] == 'X') {
-						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.   ");
+						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.");
 					}
 					else {
-						sys_msg_print("A new harvester ready                               ");
+						sys_msg_print("A new harvester ready");
 						resource.spice -= 5;
 						add_b_harvester();
 					}
 					command_key = 0;
 				}
 				else {
-					sys_msg_print("Not enough spice                               ");
+					sys_msg_print("Not enough spice");
 					command_key = 0;
 				}
 			}
 		}
 		else if (key == k_m) {
 			if (command_key == 1) {
-				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )        ");
+				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
 				command_key = 0;
 			}
 		}

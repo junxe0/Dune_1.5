@@ -14,6 +14,14 @@
 #define COLOR_DEFAULT	15
 #define COLOR_CURSOR	224
 #define COLOR_RESOURCE  112
+#define COLOR_USER_BASE 31
+#define COLOR_AI_BASE 79
+#define COLOR_PLATE 15
+#define COLOR_ROCK 143
+#define COLOR_USER_HAVESTOR 31
+#define COLOR_AI_HAVESTOR 79
+#define COLOR_SANDWORM 111
+#define COLOR_OTHER 112
 
 // 지금은 자원, 맵, 커서만 표시
 // 앞으로 화면에 표시할 내용들 여기에 추가하기

@@ -40,6 +40,13 @@ void sys_msg_print(char ch[100]) {
 	}
 	strcpy_s(sys_msg[0], sizeof(sys_msg[0]), ch);
 
+	for (int i = 0; i < 5; i++) {
+		POSITION command_print_pos = { MAP_HEIGHT + SYS_MESSAGE_HEIGHT - 1 - i, 1 };
+		set_color(15);
+		gotoxy(command_print_pos);
+		printf("                                                   \n");
+	}
+
 	// 메시지 출력
 	for (int i = 0; i < 5; i++) {
 		POSITION command_print_pos = { MAP_HEIGHT + SYS_MESSAGE_HEIGHT - 1 - i, 1 }; // 아래에서부터 출력
