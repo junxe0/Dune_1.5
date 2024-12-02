@@ -11,7 +11,7 @@ void outro(void);
 void get_info(POSITION pos);
 void clear_info(void);
 void clear_command(void);
-void cursor_move(DIRECTION dir, int c_click, int cursor_size);
+void cursor_move(DIRECTION dir, int c_click);
 void add_b_harvester(void);
 void remove_b_harvester(int index);
 void remove_r_harvester(int index);
@@ -31,8 +31,11 @@ void add_shelter(void);
 
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
-CURSOR cursor = { { 1, 1 }, { 1, 1 } };
-int cursor_size = 1;
+CURSOR cursor = {
+	{ { 1, 1 } },
+	{ { 1, 1 } },
+	1
+};
 
 /* ================= game data =================== */
 char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH] = { 0 };
@@ -185,10 +188,10 @@ int main(void) {
 
 		if (is_arrow_key(key)) {
 			if (build_key >= 2) {
-				cursor_size = 2;
+				cursor.cursor_size = 2;
 			}
 			else {
-				cursor_size = 1;
+				cursor.cursor_size = 1;
 			}
 			// 방향키 입력 처리
 			if (press_key == key) {
@@ -201,11 +204,11 @@ int main(void) {
 			}
 			last_sys_clock = sys_clock;
 			if (press_count == 2) {
-				cursor_move(ktod(key), 2, cursor_size);
+				cursor_move(ktod(key), 2);
 				press_key = 0;
 				press_count = 0;
 			}
-			else { cursor_move(ktod(key), 1, cursor_size); }
+			else { cursor_move(ktod(key), 1); }
 		}
 		else if (key == k_space) {
 			if (build_key == 2) {
@@ -229,7 +232,7 @@ int main(void) {
 				command_print("명령어 : B ( Build )\n", 1);
 			}
 			else if (build_key < 1) {
-				get_info(cursor.current);
+				get_info(cursor.current[0]);
 			}
 			build_key = 0;
 		}
@@ -746,28 +749,39 @@ void init(void) {
 }
 
 /* ================= 커서 =================== */
-void cursor_move(DIRECTION dir, int c_count, int cursor_size) {
-	POSITION curr = cursor.current;
+void cursor_move(DIRECTION dir, int c_count) {
+	POSITION curr = cursor.current[0]; // 커서의 왼쪽 위 좌표
 	POSITION new_pos = c_count == 1 ? pmove(curr, dir) : pmove2(curr, dir);
 
-	// validation check
-	if (cursor_size == 1) {
-		if (1 <= new_pos.row && new_pos.row <= MAP_HEIGHT - 2 &&
-			1 <= new_pos.column && new_pos.column <= MAP_WIDTH - 2) {
-			cursor.previous = cursor.current;
-			cursor.current = new_pos;
+	// 1x1 커서일 경우
+	if (cursor.cursor_size == 1) {
+		// 유효성 검사
+		if (new_pos.row >= 1 && new_pos.row <= MAP_HEIGHT - 2 &&
+			new_pos.column >= 1 && new_pos.column <= MAP_WIDTH - 2) {
+			cursor.previous[0] = curr; // 이전 위치 저장
+			cursor.current[0] = new_pos; // 현재 위치 업데이트
 		}
 	}
-	else if (cursor_size == 2) {
-		POSITION new_pos2 = { new_pos.row + 1, new_pos.column + 1 };
+	// 2x2 커서일 경우
+	else if (cursor.cursor_size == 2) {
+		POSITION new_pos2 = { new_pos.row + 1, new_pos.column + 1 }; // 2x2 커서의 오른쪽 아래 좌표
 
-		if (1 <= new_pos.row && new_pos.row <= MAP_HEIGHT - 2 &&
-			1 <= new_pos.column && new_pos.column <= MAP_WIDTH - 2 &&
-			1 <= new_pos2.row && new_pos2.row <= MAP_HEIGHT - 2 &&
-			1 <= new_pos2.column && new_pos2.column <= MAP_WIDTH - 2) {
+		// 2x2 커서가 모두 유효한지 체크
+		if (new_pos.row >= 1 && new_pos.row <= MAP_HEIGHT - 2 &&
+			new_pos.column >= 1 && new_pos.column <= MAP_WIDTH - 2 &&
+			new_pos2.row >= 1 && new_pos2.row <= MAP_HEIGHT - 2 &&
+			new_pos2.column >= 1 && new_pos2.column <= MAP_WIDTH - 2) {
 
-			cursor.previous = cursor.current;
-			cursor.current = new_pos;
+			// 이전 위치 저장
+			for (int i = 0; i < 4; i++) {
+				cursor.previous[i] = cursor.current[i];
+			}
+
+			// 현재 위치 업데이트 (2x2 커서)
+			cursor.current[0] = new_pos; // 왼쪽 위
+			cursor.current[1] = (POSITION){ new_pos.row, new_pos.column + 1 }; // 오른쪽 위
+			cursor.current[2] = (POSITION){ new_pos.row + 1, new_pos.column }; // 왼쪽 아래
+			cursor.current[3] = new_pos2; // 오른쪽 아래
 		}
 	}
 }
@@ -1144,7 +1158,7 @@ void sandworm2_move(void) {
 /* ================= 건설 =================== */
 /* ================= 장판 =================== */
 void add_b_plate(void) {
-	POSITION curr = cursor.current;
+	POSITION curr = cursor.current[0];
 
 	POSITION pos1 = { curr.row, curr.column };
 	POSITION pos2 = { curr.row + 1, curr.column };
@@ -1191,7 +1205,7 @@ void add_b_plate(void) {
 }
 
 void remove_b_plate(void) {
-	POSITION curr = cursor.current;
+	POSITION curr = cursor.current[0];
 
 	// 커서 위치에 기반한 장판 위치 정의
 	POSITION positions[4] = {
@@ -1223,7 +1237,7 @@ void remove_b_plate(void) {
 
 /* ================= 병영 =================== */
 void add_barracks(void) {
-	POSITION curr = cursor.current;
+	POSITION curr = cursor.current[0];
 	
 	POSITION pos1 = { curr.row, curr.column };
 	POSITION pos2 = { curr.row + 1, curr.column };
@@ -1274,7 +1288,7 @@ void add_barracks(void) {
 
 /* ================= 숙소 =================== */
 void add_dormitory(void) {
-	POSITION curr = cursor.current;
+	POSITION curr = cursor.current[0];
 	
 	POSITION pos1 = { curr.row, curr.column };
 	POSITION pos2 = { curr.row + 1, curr.column };
@@ -1325,7 +1339,7 @@ void add_dormitory(void) {
 
 /* ================= 창고 =================== */
 void add_garage(void) {
-	POSITION curr = cursor.current;
+	POSITION curr = cursor.current[0];
 
 	POSITION pos1 = { curr.row, curr.column };
 	POSITION pos2 = { curr.row + 1, curr.column };
@@ -1377,7 +1391,7 @@ void add_garage(void) {
 
 /* ================= 은신처 =================== */
 void add_shelter(void) {
-	POSITION curr = cursor.current;
+	POSITION curr = cursor.current[0];
 
 	POSITION pos1 = { curr.row, curr.column };
 	POSITION pos2 = { curr.row + 1, curr.column };

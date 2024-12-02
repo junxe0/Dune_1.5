@@ -32,8 +32,9 @@ typedef struct {
 
 // 커서 위치
 typedef struct {
-	POSITION previous;  // 직전 위치
-	POSITION current;   // 현재 위치
+	POSITION previous[4];  // 직전 위치
+	POSITION current[4];   // 현재 위치
+	int cursor_size;
 } CURSOR;
 
 // 입력 가능한 키 종류.
