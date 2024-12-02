@@ -1287,6 +1287,7 @@ void add_dormitory(void) {
 			map[0][pos4.row][pos4.column] == 'P') {
 			dormitory_count++;
 			resource.spice -= 2;
+			resource.population_max += 1;
 
 			remove_b_plate();
 
@@ -1338,6 +1339,7 @@ void add_garage(void) {
 			map[0][pos4.row][pos4.column] == 'P') {
 			garage_count++;
 			resource.spice -= 4;
+			resource.spice_max += 1;
 
 			remove_b_plate();
 
