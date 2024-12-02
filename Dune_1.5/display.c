@@ -110,19 +110,14 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 }
 // frontbuf[][]에서 커서 위치의 문자를 색만 바꿔서 그대로 다시 출력
 void display_cursor(CURSOR cursor) {
-	// 이전 커서 위치 처리
 	if (cursor.cursor_size == 1) {
-		// 2x2에서 1x1로 바뀔 때, 3x3 영역 복원
-		POSITION prev_center = cursor.previous[0]; // 2x2의 왼쪽 위
+		POSITION prev_center = cursor.previous[0];
 
-		// 3x3 영역 복원
-		for (int i = -1; i <= 1; i++) {
-			for (int j = -1; j <= 1; j++) {
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 2; j++) {
 				POSITION restore_pos = { prev_center.row + i, prev_center.column + j };
-				// 유효성 검사를 생략하고, 직접 복원
 				char ch = frontbuf[restore_pos.row][restore_pos.column];
 
-				// 이전 위치의 배경 복원
 				if (ch == 'A') { printc(padd(map_pos, restore_pos), 'B', COLOR_USER_BASE); }
 				else if (ch == 'B') { printc(padd(map_pos, restore_pos), 'B', COLOR_AI_BASE); }
 				else if (ch == 'P') { printc(padd(map_pos, restore_pos), ch, COLOR_PLATE); }
@@ -140,7 +135,6 @@ void display_cursor(CURSOR cursor) {
 			}
 		}
 
-		// 현재 커서 위치 처리
 		POSITION curr = cursor.current[0];
 		char ch = frontbuf[curr.row][curr.column];
 		if (ch == 'A') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
@@ -151,11 +145,9 @@ void display_cursor(CURSOR cursor) {
 		else { printc(padd(map_pos, curr), ch, COLOR_CURSOR); }
 	}
 	else if (cursor.cursor_size == 2) {
-		// 이전 커서 위치 처리
 		for (int i = 0; i < 4; i++) {
 			POSITION prev = cursor.previous[i];
 
-			// 이전 위치의 배경 복원
 			char ch = frontbuf[prev.row][prev.column];
 			if (ch == 'A') { printc(padd(map_pos, prev), 'B', COLOR_USER_BASE); }
 			else if (ch == 'B') { printc(padd(map_pos, prev), 'B', COLOR_AI_BASE); }
