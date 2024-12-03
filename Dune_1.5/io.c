@@ -27,14 +27,14 @@ void printo(POSITION pos, char ch) {
 }
 
 void info_print(char ch[100], int line) {
-	POSITION info_print_pos = { 2 * line, MAP_WIDTH + 1 };
+	POSITION info_print_pos = { 1 + line, MAP_WIDTH + 1 };
 	set_color(15);
 	gotoxy(info_print_pos);
 	printf("%s", ch);
 }
 
 void info_unit_list(char ch[100], int line, int num) {
-	POSITION info_print_pos = { 2 * line, MAP_WIDTH + 1 };
+	POSITION info_print_pos = { 1 + line, MAP_WIDTH + 1 };
 	set_color(15);
 	gotoxy(info_print_pos);
 	printf("%s%d", ch, num);
@@ -64,7 +64,7 @@ void sys_msg_print(char ch[100]) {
 }
 
 void command_print(char ch[100], int line) {
-	POSITION command_print_pos = { MAP_HEIGHT + (2 * line), MAP_WIDTH + 1 };
+	POSITION command_print_pos = { MAP_HEIGHT + (1 + line), MAP_WIDTH + 1 };
 	set_color(15);
 	gotoxy(command_print_pos);
 	printf("%s", ch);

@@ -967,6 +967,8 @@ void sandworm_move(void) {
 				}
 			}
 
+			sys_msg_print("샌드웜이 아군 하베스터를 잡아먹었습니다.");
+
 			sandworm1.last_attack_time = sys_clock;
 
 			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
@@ -1108,6 +1110,8 @@ void sandworm2_move(void) {
 					break; // 삭제 후 루프 종료
 				}
 			}
+
+			sys_msg_print("샌드웜이 아군 하베스터를 잡아먹었습니다.");
 
 			sandworm2.last_attack_time= sys_clock;
 
