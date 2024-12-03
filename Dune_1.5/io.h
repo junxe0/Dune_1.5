@@ -15,6 +15,7 @@ KEY get_key(void);
 void printc(POSITION pos, char ch, int color);
 void printo(POSITION pos, char ch);
 void info_print(char ch[100], int line);
+void info_unit_list(char ch[100], int line, int num);
 void sys_msg_print(char ch[100]);
 void command_print(char ch[100], int line);
 void gotoxy(POSITION pos);

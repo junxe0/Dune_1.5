@@ -33,6 +33,13 @@ void info_print(char ch[100], int line) {
 	printf("%s", ch);
 }
 
+void info_unit_list(char ch[100], int line, int num) {
+	POSITION info_print_pos = { 2 * line, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(info_print_pos);
+	printf("%s%d", ch, num);
+}
+
 char sys_msg[5][100] = { "" };
 void sys_msg_print(char ch[100]) {
 	for (int i = 4; i > 0; i--) {
@@ -92,6 +99,9 @@ KEY get_key(void) {
 	case 'S':
 	case 's':
 		return k_s;
+	case 'U':
+	case 'u':
+		return k_u;
 	case 224:
 		byte = _getch();  // MSB 224가 입력 되면 1바이트 더 전달 받기
 		switch (byte) {

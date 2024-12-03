@@ -114,12 +114,17 @@ int garage_count = 0;
 // 병영
 int barracks_pos[][2] = { 0 };
 int barracks_count = 0;
+// 보병
+int soldier_count = 0;
 // 은신처
 int shelter_pos[][2] = { 0 };
 int shelter_count = 0;
+// 프레멘
+int fremen_count = 0;
 // 명령어
 int command_key = 0;
 int build_key = 0;
+int unit_key = 0;
 
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
@@ -180,19 +185,15 @@ int main(void) {
 	int press_count = 0;
 	int last_sys_clock = 0;
 
-	command_print("명령어 : B ( Build )\n", 1);
+	command_print("명령어 : B ( Build ), U ( Unit List )", 1);
 
 	while (1) {
 		// loop 돌 때마다(즉, TICK==10ms마다) 키 입력 확인
 		KEY key = get_key();
 
 		if (is_arrow_key(key)) {
-			if (build_key >= 2) {
-				cursor.cursor_size = 2;
-			}
-			else {
-				cursor.cursor_size = 1;
-			}
+			if (build_key >= 2) { cursor.cursor_size = 2; }
+			else { cursor.cursor_size = 1; }
 			// 방향키 입력 처리
 			if (press_key == key) {
 				if (sys_clock - last_sys_clock <= 100) { press_count++; }
@@ -211,29 +212,15 @@ int main(void) {
 			else { cursor_move(ktod(key), 1); }
 		}
 		else if (key == k_space) {
-			if (build_key == 2) {
-				add_barracks();
-				command_print("명령어 : B ( Build )\n", 1);
+			if (2 <= build_key) {
+				if (build_key == 2) { add_barracks(); }
+				else if (build_key == 3) { add_b_plate(); }
+				else if (build_key == 4) { add_dormitory(); }
+				else if (build_key == 5) { add_garage(); }
+				else if (build_key == 6) { add_shelter(); }
+				command_print("명령어 : B ( Build ), U ( Unit List )", 1);
 			}
-			else if (build_key == 3) {
-				add_b_plate();
-				command_print("명령어 : B ( Build )\n", 1);
-			}
-			else if (build_key == 4) {
-				add_dormitory();
-				command_print("명령어 : B ( Build )\n", 1);
-			}
-			else if (build_key == 5) {
-				add_garage();
-				command_print("명령어 : B ( Build )\n", 1);
-			}
-			else if (build_key == 6) {
-				add_shelter();
-				command_print("명령어 : B ( Build )\n", 1);
-			}
-			else if (build_key < 1) {
-				get_info(cursor.current[0]);
-			}
+			else if (build_key < 1 && unit_key < 1) { get_info(cursor.current[0]); }
 			build_key = 0;
 		}
 		else if (key == k_h) {
@@ -243,41 +230,35 @@ int main(void) {
 			else if (command_key == 3) {
 				POSITION pos = { 14, 1 };
 				if (5 <= resource.spice) {
-					if (map[1][pos.row][pos.column] == 'X') {
-						sys_msg_print("이미 해당 자리에 하베스터가 있습니다.");
-					}
+					if (map[1][pos.row][pos.column] == 'X') { sys_msg_print("이미 해당 자리에 하베스터가 있습니다."); }
 					else {
-						sys_msg_print("A new harvester ready");
+						sys_msg_print("새로운 하베스터가 준비되었습니다.");
 						resource.spice -= 5;
 						add_b_harvester();
 					}
 				}
-				else {
-					sys_msg_print("Not enough spice");
-				}
+				else { sys_msg_print("스파이스가 충분하지 않습니다."); }
 			}
 			command_key = 0;
-			build_key = 0;
 		}
 		else if (key == k_m) {
 			if (command_key == 2) {
 				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
 			}
 			command_key = 0;
-			build_key = 0;
 		}
 		else if (key == k_b) {
-			if (command_key == 0 && build_key == 0) {
+			clear_info();
+			clear_command();
+			if (command_key == 0 && build_key == 0 && unit_key == 0) {
 				build_key = 1;
-				clear_info();
-				clear_command();
-				command_print("건설 가능한 건물 목록\n", 1);
-				command_print("장판 : P, 숙소 : D, 창고 : G\n", 2);
-				command_print("병영 : B, 은신처 : S\n", 3);
+				sys_msg_print("건설 가능한 건물 목록을 불러옵니다.");
+				command_print("건설 가능한 건물 목록", 1);
+				command_print("장판 : P, 숙소 : D, 창고 : G", 2);
+				command_print("병영 : B, 은신처 : S", 3);
 			}
 			else if (command_key == 0 && build_key == 1) {
 				build_key = 2;
-				clear_command();
 				sys_msg_print("병영 건설을 선택하셨습니다.");
 			}
 		}
@@ -309,15 +290,28 @@ int main(void) {
 				sys_msg_print("은신처 건설을 선택하셨습니다.");
 			}
 		}
+		else if (key == k_u) {
+			if (command_key == 0 && build_key == 0) {
+				unit_key = 1;
+				clear_command();
+				sys_msg_print("유닛 목록을 불러옵니다.");
+				info_print("유닛 목록", 1);
+				info_unit_list("하베스터 : ", 2, bharvestor_count);
+				info_unit_list("보병 : ", 3, soldier_count);
+				info_unit_list("프레멘 : ", 4, fremen_count);
+			}
+		}
 		else if (key == k_esc) {
 			clear_info();
 			clear_command();
-			command_print("명령어 : B ( Build )\n", 1);
-			if (build_key >= 2) {
-				sys_msg_print("건설 선택을 취소하셨습니다.");
-			}
-			command_key = 0;
-			build_key = 0;
+			command_print("명령어 : B ( Build ), U ( Unit List )", 1);
+			if (command_key == 1) { sys_msg_print("오브젝트 선택이 취소되었습니다."); }
+			else if (build_key == 2) { sys_msg_print("병영 건설을 취소하셨습니다."); }
+			else if (build_key == 3) { sys_msg_print("장판 건설을 취소하셨습니다."); }
+			else if (build_key == 4) { sys_msg_print("숙소 건설을 취소하셨습니다."); }
+			else if (build_key == 5) { sys_msg_print("창고 건설을 취소하셨습니다."); }
+			else if (build_key == 6) { sys_msg_print("은신처 건설을 취소하셨습니다."); }
+			command_key = 0, build_key = 0, unit_key = 0;
 		}
 		else {
 			switch (key) {
@@ -352,112 +346,123 @@ void get_info(POSITION pos) {
 	case ' ':
 		switch (ch1) {
 		case 'W':
-			info_print("선택된 오브젝트 : 샌드웜 ( 중립 )\n", 1);
-			info_print("생산 비용 : 없음\n", 2);
-			info_print("인구수 : 없음\n", 3);
-			info_print("이동 주기 : 2500\n", 4);
-			info_print("공격력 : 무한대\n", 5);
-			info_print("공격 주기 : 10000\n", 6);
-			info_print("체력 : 무한대\n", 7);
-			info_print("시야 : 무한대\n", 8);
-			command_print("명령어 : 없음\n", 1);
+			sys_msg_print("샌드웜을 선택하셨습니다.");
+			info_print("선택된 오브젝트 : 샌드웜 ( 중립 )", 1);
+			info_print("생산 비용 : 없음", 2);
+			info_print("인구수 : 없음", 3);
+			info_print("이동 주기 : 2500", 4);
+			info_print("공격력 : 무한대", 5);
+			info_print("공격 주기 : 10000", 6);
+			info_print("체력 : 무한대", 7);
+			info_print("시야 : 무한대", 8);
+			command_print("명령어 : 없음", 1);
 			break;
 		case 'X':
 		case 'Y':
-			info_print("선택된 오브젝트 : 하베스터\n", 1);
-			info_print("생산 비용 : 5\n", 2);
-			info_print("인구수 : 5\n", 3);
-			info_print("이동 주기 : 2000\n", 4);
-			info_print("공격력 : 없음\n", 5);
-			info_print("공격 주기 : 없음\n", 6);
-			info_print("체력 : 70\n", 7);
-			info_print("시야 : 0\n", 8);
+			sys_msg_print("하베스터를 선택하셨습니다.");
+			info_print("선택된 오브젝트 : 하베스터", 1);
+			info_print("생산 비용 : 5", 2);
+			info_print("인구수 : 5", 3);
+			info_print("이동 주기 : 2000", 4);
+			info_print("공격력 : 없음", 5);
+			info_print("공격 주기 : 없음", 6);
+			info_print("체력 : 70", 7);
+			info_print("시야 : 0", 8);
 			switch (ch1) {
 			case 'X':
-				command_print("명령어 : H ( Harvest ), M ( Move )\n", 1);
+				command_print("명령어 : H ( Harvest ), M ( Move )", 1);
 				command_key = 2;
 			default:
 				break;
 			}
 			break;
 		default:
-			info_print("선택된 오브젝트 : 사막 지형\n", 1);
+			sys_msg_print("사막지형을 선택하셨습니다.");
+			info_print("선택된 오브젝트 : 사막 지형", 1);
 			break;
 		}
 		break;
 	case 'A':
 	case 'B':
-		info_print("선택된 오브젝트 : 본진\n", 1);
-		info_print("건설 비용 : 없음\n", 2);
-		info_print("내구도 : 50\n", 3);
+		sys_msg_print("본진을 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 본진", 1);
+		info_print("건설 비용 : 없음", 2);
+		info_print("내구도 : 50", 3);
 		switch (ch0) {
 		case 'A':
-			command_print("명령어 : H ( 하베스터 생산 )\n", 1);
+			command_print("명령어 : H ( 하베스터 생산 )", 1);
 			command_key = 3;
 		default:
 			break;
 		}
 		break;
 	case 'P':
-		info_print("선택된 오브젝트 : 장판\n", 1);
-		info_print("설명 : 건물 짓기 전에 깔기\n", 2);
-		info_print("건설 비용 : 1\n", 3);
-		info_print("내구도 : 없음\n", 4);
+		sys_msg_print("장판을 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 장판", 1);
+		info_print("설명 : 건물 짓기 전에 깔기", 2);
+		info_print("건설 비용 : 1", 3);
+		info_print("내구도 : 없음", 4);
 		break;
 	case 'R':
-		info_print("선택된 오브젝트 : 바위\n", 1);
+		sys_msg_print("바위를 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 바위", 1);
 		break;
 	case '5':
 	case '4':
 	case '3':
 	case '2':
 	case '1':
-		info_print("선택된 오브젝트 : 스파이시\n", 1);
+		sys_msg_print("스파이스를 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 스파이스", 1);
 		switch (ch0) {
 		case '4':
-			info_print("매장량 : 4\n", 2);
+			info_print("매장량 : 4", 2);
 			break;
 		case '3':
-			info_print("매장량 : 3\n", 2);
+			info_print("매장량 : 3", 2);
 			break;
 		case '2':
-			info_print("매장량 : 2\n", 2);
+			info_print("매장량 : 2", 2);
 			break;
 		case '1':
-			info_print("매장량 : 1\n", 2);
+			info_print("매장량 : 1", 2);
 			break;
 		default:
-			info_print("매장량 : 5\n", 2);
+			info_print("매장량 : 5", 2);
 			break;
 		}
 		break;
 	case 'D':
-		info_print("선택된 오브젝트 : 숙소\n", 1);
-		info_print("설명 : 인구 최대치 증가 ( 10 )\n", 2);
-		info_print("건설 비용 : 2\n", 3);
-		info_print("내구도 : 10\n", 4);
-		command_print("명령어 : 없음\n", 1);
+		sys_msg_print("숙소를 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 숙소", 1);
+		info_print("설명 : 인구 최대치 증가 ( 10 )", 2);
+		info_print("건설 비용 : 2", 3);
+		info_print("내구도 : 10", 4);
+		command_print("명령어 : 없음", 1);
 		break;
 	case 'G':
-		info_print("선택된 오브젝트 : 창고\n", 1);
-		info_print("설명 : 스파이스 보관 최대치 증가 ( 10 )\n", 2);
-		info_print("건설 비용 : 4\n", 3);
-		info_print("내구도 : 10\n", 4);
-		command_print("명령어 : 없음\n", 1);
+		sys_msg_print("창고를 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 창고", 1);
+		info_print("설명 : 스파이스 보관 최대치 증가 ( 10 )", 2);
+		info_print("건설 비용 : 4", 3);
+		info_print("내구도 : 10", 4);
+		command_print("명령어 : 없음", 1);
 		break;
 	case 'C':
-		info_print("선택된 오브젝트 : 병영\n", 1);
-		info_print("설명 : 보병 생산\n", 2);
-		info_print("건설 비용 : 4\n", 3);
-		info_print("내구도 : 20\n", 4);
-		command_print("명령어 : S ( 보병 생산 )\n", 1);
+		sys_msg_print("병영을 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 병영", 1);
+		info_print("설명 : 보병 생산", 2);
+		info_print("건설 비용 : 4", 3);
+		info_print("내구도 : 20", 4);
+		command_print("명령어 : S ( 보병 생산 )", 1);
 		break;
 	case 'S':
-		info_print("선택된 오브젝트 : 은신처\n", 1);
-		info_print("설명 : 특수 유닛 생산\n", 2);
-		info_print("건설 비용 : 5\n", 3);
-		info_print("내구도 : 30\n", 4);
-		command_print("명령어 : F ( 프레멘 생산 )\n", 1);
+		sys_msg_print("은신처를 선택하셨습니다.");
+		info_print("선택된 오브젝트 : 은신처", 1);
+		info_print("설명 : 특수 유닛 생산", 2);
+		info_print("건설 비용 : 5", 3);
+		info_print("내구도 : 30", 4);
+		command_print("명령어 : F ( 프레멘 생산 )", 1);
 		break;
 	default:
 		break;
@@ -467,13 +472,13 @@ void get_info(POSITION pos) {
 /* ================= 청소 =================== */
 void clear_info(void) {
 	for (int i = 1; i <= 8; i++) {
-		info_print("                                    \n", i);
+		info_print("                                                ", i);
 	}
 }
 
 void clear_command(void) {
 	for (int i = 1; i <= 3; i++) {
-		command_print("                                    \n", i);
+		command_print("                                              ", i);
 	}
 }
 
