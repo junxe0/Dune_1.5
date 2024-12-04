@@ -16,6 +16,7 @@ void printc(POSITION pos, char ch, int color);
 void printo(POSITION pos, char ch);
 void info_print(char ch[100], int line);
 void info_print_num(char ch[100], int line, int num);
+void info_print_num2(char ch[100], int num, int num2, int line);
 void sys_msg_print(char ch[100]);
 void command_print(char ch[100], int line);
 void gotoxy(POSITION pos);

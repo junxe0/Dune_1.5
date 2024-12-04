@@ -124,7 +124,15 @@ struct {
 	// 현재 좌표
 	POSITION pos;
 	POSITION dest;
+	// 체력
 	int hp;
+	// 이동
+	char active[100];
+	int speed;
+	int next_move_time;
+	// 수확
+	char harvest[100];
+	int spice;
 } HARVESTOR;
 
 #endif

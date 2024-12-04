@@ -13,8 +13,6 @@ void outro(void);
 // 스페이스바 정보
 void get_info(POSITION pos);
 void print_get_info(POSITION pos, char ch);
-int get_harvester_health(POSITION pos);
-int get_harvester_index(POSITION pos);
 
 // 청소
 void clear_info(void);
@@ -26,6 +24,11 @@ void cursor_move(DIRECTION dir, int c_click);
 // 하베스터
 void add_b_harvester(void);
 void add_r_harvester(void);
+int get_harvester_health(POSITION pos);
+int get_harvester_index(POSITION pos);
+void bharvester_move(void);
+void bharvester_set_dest(POSITION select_pos, POSITION pos);
+void bharvester_harvest(POSITION select_pos, POSITION pos);
 void damage_b_harvester(int index, int damage);
 void remove_b_harvester(int index);
 void remove_r_harvester(int index);
@@ -142,6 +145,8 @@ char command_key[100] = { 0 };
 int build_key = 0;
 int unit_key = 0;
 
+POSITION select_pos = { 0, 0 };
+
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
 	// 스파이스
@@ -239,12 +244,24 @@ int main(void) {
 				else if (build_key == 6) { add_shelter(); }
 				command_print("명령어 : B ( Build ), U ( Unit List )", 1);
 			}
+			else if (strcmp(command_key, "harvest") == 0) {
+				sys_msg_print("하베스터가 스파이스를 목적지로하여 이동합니다.");
+				bharvester_harvest(select_pos, cursor.current[0]);
+				strcpy_s(command_key, 50, "None");
+			}
+			else if (strcmp(command_key, "harvestor_move") == 0) {
+				sys_msg_print("하베스터가 목적지로 이동합니다.");
+				bharvester_set_dest(select_pos, cursor.current[0]);
+				strcpy_s(command_key, 50, "None");
+			}
 			else if (build_key < 1 && unit_key < 1) { get_info(cursor.current[0]); }
 			build_key = 0;
 		}
 		else if (key == k_h) {
 			if (strcmp(command_key, "select_harvestor") == 0) {
-				sys_msg_print("수확하기 8번에서 추가 ( 미구현 )");
+				select_pos = cursor.current[0];
+				sys_msg_print("스파이스 매장지를 선택해주세요.");
+				strcpy_s(command_key, 50, "harvest");
 			}
 			else if (strcmp(command_key, "select_base") == 0) {
 				POSITION pos = { 14, 1 };
@@ -257,12 +274,14 @@ int main(void) {
 					}
 				}
 				else { sys_msg_print("스파이스가 충분하지 않습니다."); }
+				strcpy_s(command_key, 50, "None");
 			}
-			strcpy_s(command_key, 50, "None");
 		}
 		else if (key == k_m) {
 			if (strcmp(command_key, "select_harvestor") == 0) {
-				sys_msg_print("이동하기 8번에서 추가 ( 미구현 )");
+				select_pos = cursor.current[0];
+				sys_msg_print("하베스터를 이동시킬 곳을 선택해주세요.");
+				strcpy_s(command_key, 50, "harvestor_move");
 			}
 			strcpy_s(command_key, 50, "None");
 		}
@@ -343,7 +362,10 @@ int main(void) {
 			}
 		}
 
-		// 샌드웜 동작
+		// 하베스터 이동
+		bharvester_move();
+
+		// 샌드웜 이동
 		sandworm_move();
 		sandworm2_move();
 
@@ -505,36 +527,6 @@ void print_get_info(POSITION pos, char ch) {
 		info_print("내구도 : 30", 4);
 		command_print("명령어 : F ( 프레멘 생산 )", 1);
 	}
-}
-
-// 하베스터의 현재 체력을 반환하는 함수
-int get_harvester_health(POSITION pos) {
-	// 하베스터의 인덱스를 찾음
-	int index = get_harvester_index(pos);
-	if (index != -1) {
-		if (map[1][pos.row][pos.column] == 'X') {
-			return bharvestors[index].hp; // 아군 하베스터의 체력 반환
-		}
-		else if (map[1][pos.row][pos.column] == 'Y') {
-			return rharvestors[index].hp; // 적군 하베스터의 체력 반환
-		}
-	}
-	return 0; // 하베스터가 아닐 경우 0 반환
-}
-
-// 하베스터의 인덱스를 반환하는 함수
-int get_harvester_index(POSITION pos) {
-	for (int i = 0; i < bharvestor_count; i++) {
-		if (bharvestors[i].pos.row == pos.row && bharvestors[i].pos.column == pos.column) {
-			return i; // 아군 하베스터의 인덱스 반환
-		}
-	}
-	for (int i = 0; i < rharvestor_count; i++) {
-		if (rharvestors[i].pos.row == pos.row && rharvestors[i].pos.column == pos.column) {
-			return i; // 적군 하베스터의 인덱스 반환
-		}
-	}
-	return -1; // 하베스터가 없을 경우 -1 반환
 }
 
 /* ================= 청소 =================== */
@@ -867,6 +859,11 @@ void add_b_harvester() {
 		bharvestors[bharvestor_count].pos.row = hpos.row;
 		bharvestors[bharvestor_count].pos.column = hpos.column;
 		bharvestors[bharvestor_count].hp = 20;
+		strcpy_s(bharvestors[bharvestor_count].active, 50, "stop");
+		bharvestors[bharvestor_count].next_move_time = 0;
+		bharvestors[bharvestor_count].speed = 2000;
+		strcpy_s(bharvestors[bharvestor_count].harvest, 50, "stop");
+		bharvestors[bharvestor_count].spice = 0;
 		bharvestor_count++;
 
 		// 맵에 하베스터 위치 표시
@@ -880,10 +877,118 @@ void add_r_harvester() {
 		rharvestors[rharvestor_count].pos.row = hpos.row;
 		rharvestors[rharvestor_count].pos.column = hpos.column;
 		rharvestors[rharvestor_count].hp = 20;
+		strcpy_s(rharvestors[rharvestor_count].active, 50, "stop");
+		rharvestors[rharvestor_count].next_move_time = 0;
+		rharvestors[rharvestor_count].speed = 2000;
+		strcpy_s(rharvestors[rharvestor_count].harvest, 50, "stop");
+		rharvestors[rharvestor_count].spice = 0;
 		rharvestor_count++;
 
 		// 맵에 하베스터 위치 표시
 		map[1][hpos.row][hpos.column] = 'Y';
+	}
+}
+
+int get_harvester_health(POSITION pos) {
+	int index = get_harvester_index(pos);
+	if (index != -1) {
+		if (map[1][pos.row][pos.column] == 'X') {
+			return bharvestors[index].hp;
+		}
+		else if (map[1][pos.row][pos.column] == 'Y') {
+			return rharvestors[index].hp;
+		}
+	}
+	return 0; // 하베스터가 아닐 경우 0 반환
+}
+
+int get_harvester_index(POSITION pos) {
+	for (int i = 0; i < bharvestor_count; i++) {
+		if (bharvestors[i].pos.row == pos.row && bharvestors[i].pos.column == pos.column) {
+			return i;
+		}
+	}
+	for (int i = 0; i < rharvestor_count; i++) {
+		if (rharvestors[i].pos.row == pos.row && rharvestors[i].pos.column == pos.column) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void bharvester_harvest(POSITION select_pos, POSITION pos) {
+	char ch = map[0][pos.row][pos.column];
+	if (ch >= '1' && ch <= '5') {
+		bharvester_set_dest(select_pos, pos);
+	}
+	else {
+		return;
+	}
+}
+
+void bharvester_set_harvest(POSITION select_pos, POSITION pos) {
+	int index = get_harvester_index(select_pos);
+	if (index != -1) {
+		strcpy_s(bharvestors[index].harvest, 50, "harvest");
+		bharvester_set_dest(select_pos, pos);
+	}
+	else {
+		return; // 하베스터가 존재하지 않음
+	}
+}
+
+void bharvester_set_dest(POSITION select_pos, POSITION pos) {
+	int index = get_harvester_index(select_pos);
+	if (index != -1) {
+		if (sys_clock >= bharvestors[index].next_move_time) {
+			if ((pos.row != -1 && pos.column != -1) &&
+				(pos.row != bharvestors[index].pos.row || pos.column != bharvestors[index].pos.column)) { // 이동 조건 수정
+				bharvestors[index].dest = pos; // 목적지 설정
+				strcpy_s(bharvestors[index].active, 50, "move");
+				bharvester_move();
+			}
+		}
+	}
+	else {
+		return; // 하베스터가 존재하지 않음
+	}
+}
+
+void bharvester_move(void) {
+	for (int i = 0; i < bharvestor_count; i++) {
+		HARVESTOR* harvester = &bharvestors[i];
+
+		if (strcmp(harvester->active, "move") == 0) {
+			if (sys_clock >= harvester->next_move_time) {
+				map[1][harvester->pos.row][harvester->pos.column] = -1;
+
+				// 목적지로 이동
+				if (harvester->pos.row < harvester->dest.row) {
+					harvester->pos.row++; // 아래로 이동
+				}
+				else if (harvester->pos.row > harvester->dest.row) {
+					harvester->pos.row--; // 위로 이동
+				}
+
+				if (harvester->pos.column < harvester->dest.column) {
+					harvester->pos.column++; // 오른쪽으로 이동
+				}
+				else if (harvester->pos.column > harvester->dest.column) {
+					harvester->pos.column--; // 왼쪽으로 이동
+				}
+
+				// 목적지 도착 확인
+				if (harvester->pos.row == harvester->dest.row && harvester->pos.column == harvester->dest.column) {
+					sys_msg_print("하베스터가 목적지에 도착했습니다.");
+					strcpy_s(harvester->active, 50, "stop");
+				}
+
+				map[1][harvester->pos.row][harvester->pos.column] = 'X';
+
+				// 다음 이동 시간 설정
+				harvester->next_move_time = sys_clock + harvester->speed;
+			}
+		}
 	}
 }
 
@@ -1030,7 +1135,7 @@ POSITION sandworm_next_position(void) {
 }
 
 void sandworm_move(void) {
-	if (sys_clock <= sandworm1.next_move_time) {
+	if (sys_clock < sandworm1.next_move_time) {
 		return; // 아직 이동할 시간이 아님
 	}
 
@@ -1178,7 +1283,7 @@ POSITION sandworm2_next_position(void) {
 }
 
 void sandworm2_move(void) {
-	if (sys_clock <= sandworm2.next_move_time) {
+	if (sys_clock < sandworm2.next_move_time) {
 		return; // 아직 이동할 시간이 아님
 	}
 

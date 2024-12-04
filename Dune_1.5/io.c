@@ -40,6 +40,13 @@ void info_print_num(char ch[100], int num, int line) {
 	printf("%s%d", ch, num);
 }
 
+void info_print_num2(char ch[100], int num, int num2, int line) {
+	POSITION info_print_pos = { 1 + line, MAP_WIDTH + 1 };
+	set_color(15);
+	gotoxy(info_print_pos);
+	printf("%s ( %d, %d )", ch, num, num2);
+}
+
 char sys_msg[5][100] = { "" };
 void sys_msg_print(char ch[100]) {
 	for (int i = 4; i > 0; i--) {
