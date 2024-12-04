@@ -27,8 +27,8 @@ void add_r_harvester(void);
 int get_harvester_health(POSITION pos);
 int get_harvester_index(POSITION pos);
 void bharvester_move(void);
+void bharvester_set_harvest(POSITION select_pos, POSITION pos);
 void bharvester_set_dest(POSITION select_pos, POSITION pos);
-void bharvester_harvest(POSITION select_pos, POSITION pos);
 void damage_b_harvester(int index, int damage);
 void remove_b_harvester(int index);
 void remove_r_harvester(int index);
@@ -151,7 +151,7 @@ POSITION select_pos = { 0, 0 };
 RESOURCE resource = { 
 	// 스파이스
 	.spice = 0,
-	.spice_max = 0,
+	.spice_max = 10,
 	// 인구
 	.population = 0,
 	.population_max = 0
@@ -245,8 +245,8 @@ int main(void) {
 				command_print("명령어 : B ( Build ), U ( Unit List )", 1);
 			}
 			else if (strcmp(command_key, "harvest") == 0) {
-				sys_msg_print("하베스터가 스파이스를 목적지로하여 이동합니다.");
-				bharvester_harvest(select_pos, cursor.current[0]);
+				sys_msg_print("하베스터가 스파이스 매장지를 목적지로하여 이동합니다.");
+				bharvester_set_harvest(select_pos, cursor.current[0]);
 				strcpy_s(command_key, 50, "None");
 			}
 			else if (strcmp(command_key, "harvestor_move") == 0) {
@@ -254,12 +254,14 @@ int main(void) {
 				bharvester_set_dest(select_pos, cursor.current[0]);
 				strcpy_s(command_key, 50, "None");
 			}
-			else if (build_key < 1 && unit_key < 1) { get_info(cursor.current[0]); }
+			else if (build_key < 1 && unit_key < 1) { 
+				get_info(cursor.current[0]);
+				select_pos = cursor.current[0];
+			}
 			build_key = 0;
 		}
 		else if (key == k_h) {
 			if (strcmp(command_key, "select_harvestor") == 0) {
-				select_pos = cursor.current[0];
 				sys_msg_print("스파이스 매장지를 선택해주세요.");
 				strcpy_s(command_key, 50, "harvest");
 			}
@@ -279,11 +281,9 @@ int main(void) {
 		}
 		else if (key == k_m) {
 			if (strcmp(command_key, "select_harvestor") == 0) {
-				select_pos = cursor.current[0];
 				sys_msg_print("하베스터를 이동시킬 곳을 선택해주세요.");
 				strcpy_s(command_key, 50, "harvestor_move");
 			}
-			strcpy_s(command_key, 50, "None");
 		}
 		else if (key == k_b) {
 			clear_info();
@@ -344,11 +344,13 @@ int main(void) {
 			clear_command();
 			command_print("명령어 : B ( Build ), U ( Unit List )", 1);
 			if (strcmp(command_key, "select_obj") == 0) { sys_msg_print("오브젝트 선택이 취소되었습니다."); }
-			else if (build_key == 2) { sys_msg_print("병영 건설을 취소하셨습니다."); }
-			else if (build_key == 3) { sys_msg_print("장판 건설을 취소하셨습니다."); }
-			else if (build_key == 4) { sys_msg_print("숙소 건설을 취소하셨습니다."); }
-			else if (build_key == 5) { sys_msg_print("창고 건설을 취소하셨습니다."); }
-			else if (build_key == 6) { sys_msg_print("은신처 건설을 취소하셨습니다."); }
+			else if (strcmp(command_key, "harvest") == 0) { sys_msg_print("스파이스 매장지 선택이 취소되었습니다."); }
+			else if (strcmp(command_key, "harvestor_move") == 0) { sys_msg_print("하베스터 목적지 선택이 취소되었습니다."); }
+			else if (build_key == 2) { sys_msg_print("병영 건설 선택을 취소하셨습니다."); }
+			else if (build_key == 3) { sys_msg_print("장판 건설 선택을 취소하셨습니다."); }
+			else if (build_key == 4) { sys_msg_print("숙소 건설 선택을 취소하셨습니다."); }
+			else if (build_key == 5) { sys_msg_print("창고 건설 선택을 취소하셨습니다."); }
+			else if (build_key == 6) { sys_msg_print("은신처 건설 선택을 취소하셨습니다."); }
 			strcpy_s(command_key, 50, "None"), build_key = 0, unit_key = 0;
 		}
 		else {
@@ -863,6 +865,7 @@ void add_b_harvester() {
 		bharvestors[bharvestor_count].next_move_time = 0;
 		bharvestors[bharvestor_count].speed = 2000;
 		strcpy_s(bharvestors[bharvestor_count].harvest, 50, "stop");
+		bharvestors[bharvestor_count].harvest_speed = 3000;
 		bharvestors[bharvestor_count].spice = 0;
 		bharvestor_count++;
 
@@ -881,6 +884,7 @@ void add_r_harvester() {
 		rharvestors[rharvestor_count].next_move_time = 0;
 		rharvestors[rharvestor_count].speed = 2000;
 		strcpy_s(rharvestors[rharvestor_count].harvest, 50, "stop");
+		rharvestors[rharvestor_count].harvest_speed = 3000;
 		rharvestors[rharvestor_count].spice = 0;
 		rharvestor_count++;
 
@@ -916,16 +920,6 @@ int get_harvester_index(POSITION pos) {
 	return -1;
 }
 
-void bharvester_harvest(POSITION select_pos, POSITION pos) {
-	char ch = map[0][pos.row][pos.column];
-	if (ch >= '1' && ch <= '5') {
-		bharvester_set_dest(select_pos, pos);
-	}
-	else {
-		return;
-	}
-}
-
 void bharvester_set_harvest(POSITION select_pos, POSITION pos) {
 	int index = get_harvester_index(select_pos);
 	if (index != -1) {
@@ -958,6 +952,17 @@ void bharvester_move(void) {
 	for (int i = 0; i < bharvestor_count; i++) {
 		HARVESTOR* harvester = &bharvestors[i];
 
+		if (strcmp(harvester->active, "stop") == 0 && strcmp(harvester->harvest, "harvest") == 0) {
+			if (sys_clock >= harvester->next_move_time) {
+				sys_msg_print("하베스터가 스파이스 수확을 완료하였습니다.");
+				sys_msg_print("하베스터가 본진을 목적지로하여 출발합니다.");
+				strcpy_s(harvester->harvest, 50, "stop");
+				strcpy_s(harvester->active, 50, "move");
+				POSITION pos = { 14, 1 };
+				bharvester_set_dest(harvester->pos, pos);
+			}
+		}
+
 		if (strcmp(harvester->active, "move") == 0) {
 			if (sys_clock >= harvester->next_move_time) {
 				map[1][harvester->pos.row][harvester->pos.column] = -1;
@@ -977,16 +982,38 @@ void bharvester_move(void) {
 					harvester->pos.column--; // 왼쪽으로 이동
 				}
 
-				// 목적지 도착 확인
-				if (harvester->pos.row == harvester->dest.row && harvester->pos.column == harvester->dest.column) {
-					sys_msg_print("하베스터가 목적지에 도착했습니다.");
-					strcpy_s(harvester->active, 50, "stop");
-				}
-
 				map[1][harvester->pos.row][harvester->pos.column] = 'X';
 
 				// 다음 이동 시간 설정
 				harvester->next_move_time = sys_clock + harvester->speed;
+
+				// 목적지 도착 확인
+				if (harvester->pos.row == harvester->dest.row && harvester->pos.column == harvester->dest.column) {
+					sys_msg_print("하베스터가 목적지에 도착했습니다.");
+					strcpy_s(harvester->active, 50, "stop");
+					if (strcmp(harvester->harvest, "harvest") == 0) {
+						sys_msg_print("하베스터가 스파이스 수확을 시작합니다.");
+						int spice = rand() % 2 + 3;
+						char ch0 = map[0][harvester->pos.row][harvester->pos.column];
+						if (spice > ch0 - '0') {
+							spice = ch0 - '0';
+						}
+						harvester->next_move_time = sys_clock + harvester->harvest_speed;
+						harvester->spice += spice;
+					}
+					if (harvester->spice > 0 && harvester->pos.row == 14 && harvester->pos.column == 1) {
+						sys_msg_print("하베스터가 수확해온 스파이스를 창고에 저장합니다.");
+						if ((resource.spice + harvester->spice) > resource.spice_max) {
+							sys_msg_print("창고 저장량을 초과하여 나머지는 버려집니다.");
+							resource.spice = resource.spice_max;
+							harvester->spice = 0;
+						}
+						else {
+							resource.spice += harvester->spice;
+							harvester->spice = 0;
+						}
+					}
+				}
 			}
 		}
 	}

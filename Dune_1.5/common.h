@@ -132,6 +132,7 @@ struct {
 	int next_move_time;
 	// ¼öÈ®
 	char harvest[100];
+	int harvest_speed;
 	int spice;
 } HARVESTOR;
 

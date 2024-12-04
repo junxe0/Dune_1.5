@@ -58,7 +58,7 @@ void sys_msg_print(char ch[100]) {
 		POSITION command_print_pos = { MAP_HEIGHT + SYS_MESSAGE_HEIGHT - 1 - i, 1 };
 		set_color(15);
 		gotoxy(command_print_pos);
-		printf("                                                   \n");
+		printf("                                                      \n");
 	}
 
 	// 메시지 출력
