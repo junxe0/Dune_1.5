@@ -33,7 +33,7 @@ void info_print(char ch[100], int line) {
 	printf("%s", ch);
 }
 
-void info_unit_list(char ch[100], int line, int num) {
+void info_print_num(char ch[100], int num, int line) {
 	POSITION info_print_pos = { 1 + line, MAP_WIDTH + 1 };
 	set_color(15);
 	gotoxy(info_print_pos);

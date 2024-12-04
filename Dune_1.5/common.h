@@ -118,4 +118,13 @@ struct {
 	int next_defecation_time;
 	int last_defecation_time;
 } SANDWORM;
+
+typedef 
+struct {
+	// ÇöÀç ÁÂÇ¥
+	POSITION pos;
+	POSITION dest;
+	int hp;
+} HARVESTOR;
+
 #endif
