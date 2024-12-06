@@ -21,8 +21,10 @@
 #define SYS_MESSAGE_HEIGHT 7
 #define COMMAND_WIDTH 50
 #define COMMAND_HEIGHT 7
-// 최대 하베스터
-#define MAX_HARVESTERS 100
+
+// 최대 갯수 지정
+#define MAX_HARVESTORS 100
+#define MAX_SPICE 100
 
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체
@@ -92,14 +94,23 @@ inline POSITION dtop2(DIRECTION d) {
 #define pmove2(p, d)	(padd((p), dtop2(d)))
 
 /* ================= game data =================== */
-typedef struct {
+typedef 
+struct {
 	int spice;		// 현재 보유한 스파이스
 	int spice_max;  // 스파이스 최대 저장량
 	int population; // 현재 인구 수
 	int population_max;  // 수용 가능한 인구 수
 } RESOURCE;
 
-// 샌드웜 이동
+// 스파이스
+typedef 
+struct {
+	int row;
+	int column;
+	int amount;
+} SPICE;
+
+// 샌드웜
 typedef 
 struct {
 	// 현재 좌표
@@ -119,6 +130,7 @@ struct {
 	int last_defecation_time;
 } SANDWORM;
 
+// 하베스터
 typedef 
 struct {
 	// 현재 좌표
@@ -131,6 +143,7 @@ struct {
 	int speed;
 	int next_move_time;
 	// 수확
+	POSITION spice_pos;
 	char harvest[100];
 	int harvest_speed;
 	int spice;
