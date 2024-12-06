@@ -133,7 +133,7 @@ struct {
 // 하베스터
 typedef 
 struct {
-	// 현재 좌표
+	// 좌표
 	POSITION pos;
 	POSITION dest;
 	// 체력
@@ -148,5 +148,45 @@ struct {
 	int harvest_speed;
 	int spice;
 } HARVESTOR;
+
+// 보병
+typedef
+struct {
+	// 좌표
+	POSITION pos;
+	POSITION dest;
+	// 체력
+	int hp;
+	// 이동
+	int speed;
+	int next_move_time;
+	// 공격
+	int atk;
+	int attack_speed;
+	int next_attack_time;
+	// 시야
+	int sight;
+
+} SOLDIER;
+
+// 보병
+typedef
+struct {
+	// 좌표
+	POSITION pos;
+	POSITION dest;
+	// 체력
+	int hp;
+	// 이동
+	int speed;
+	int next_move_time;
+	// 공격
+	int atk;
+	int attack_speed;
+	int next_attack_time;
+	// 시야
+	int sight;
+
+} FREMEN;
 
 #endif
