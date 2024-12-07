@@ -23,8 +23,10 @@
 #define COMMAND_HEIGHT 7
 
 // 최대 갯수 지정
-#define MAX_HARVESTORS 100
-#define MAX_SPICE 100
+#define MAX_HARVESTORS 20
+#define MAX_SPICE 20
+#define MAX_SOLDIER 20
+#define MAX_FREMEN 20
 
 /* ================= 위치와 방향 =================== */
 // 맵에서 위치를 나타내는 구조체
@@ -45,7 +47,7 @@ typedef enum {
 	// k_none: 입력된 키가 없음. d_stay(안 움직이는 경우)에 대응
 	k_none = 0, k_up, k_right, k_left, k_down, 
 	k_space, k_esc, k_h, k_m, k_b,
-	k_p, k_d, k_g, k_s, k_u,
+	k_p, k_d, k_g, k_s, k_u, k_f,
 	k_quit,
 	k_undef, // 정의되지 않은 키 입력	
 } KEY;
@@ -155,9 +157,13 @@ struct {
 	// 좌표
 	POSITION pos;
 	POSITION dest;
+	POSITION first_pos;
+	POSITION patrol_pos;
 	// 체력
 	int hp;
 	// 이동
+	char active[100];
+	char patrol[100];
 	int speed;
 	int next_move_time;
 	// 공격
@@ -166,18 +172,21 @@ struct {
 	int next_attack_time;
 	// 시야
 	int sight;
-
 } SOLDIER;
 
-// 보병
+// 프레멘
 typedef
 struct {
 	// 좌표
 	POSITION pos;
 	POSITION dest;
+	POSITION first_pos;
+	POSITION patrol_pos;
 	// 체력
 	int hp;
 	// 이동
+	char active[100];
+	char patrol[100];
 	int speed;
 	int next_move_time;
 	// 공격
@@ -186,7 +195,6 @@ struct {
 	int next_attack_time;
 	// 시야
 	int sight;
-
 } FREMEN;
 
 #endif

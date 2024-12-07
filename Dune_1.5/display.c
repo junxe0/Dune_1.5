@@ -101,6 +101,9 @@ void display_map(char map[N_LAYER][MAP_HEIGHT][MAP_WIDTH]) {
 				else if (ch == 'C') { printc(padd(map_pos, pos), 'B', COLOR_BARRACKS); }
 				else if (ch == 'S') { printc(padd(map_pos, pos), ch, COLOR_SHELTER); }
 
+				else if (ch == 'E') { printc(padd(map_pos, pos), 'S', COLOR_USER_SOLDIER); }
+				else if (ch == 'F') { printc(padd(map_pos, pos), ch, COLOR_USER_FREMEN); }
+
 				else if (ch == '#') { printc(padd(map_pos, pos), ch, COLOR_DEFAULT); }
 				else { printc(padd(map_pos, pos), ch, COLOR_OTHER); }
 			}
@@ -130,6 +133,8 @@ void display_cursor(CURSOR cursor) {
 				else if (ch == 'G') { printc(padd(map_pos, restore_pos), ch, COLOR_GARAGE); }
 				else if (ch == 'C') { printc(padd(map_pos, restore_pos), 'B', COLOR_BARRACKS); }
 				else if (ch == 'S') { printc(padd(map_pos, restore_pos), ch, COLOR_SHELTER); }
+				else if (ch == 'E') { printc(padd(map_pos, restore_pos), 'S', COLOR_USER_SOLDIER); }
+				else if (ch == 'F') { printc(padd(map_pos, restore_pos), ch, COLOR_USER_FREMEN); }
 				else if (ch == '#') { printc(padd(map_pos, restore_pos), ch, COLOR_DEFAULT); }
 				else { printc(padd(map_pos, restore_pos), ch, COLOR_OTHER); }
 			}
@@ -142,6 +147,7 @@ void display_cursor(CURSOR cursor) {
 		else if (ch == 'X') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
 		else if (ch == 'Y') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
 		else if (ch == 'C') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
+		else if (ch == 'E') { printc(padd(map_pos, curr), 'S', COLOR_CURSOR); }
 		else { printc(padd(map_pos, curr), ch, COLOR_CURSOR); }
 	}
 	else if (cursor.cursor_size == 2) {
@@ -161,7 +167,10 @@ void display_cursor(CURSOR cursor) {
 			else if (ch == 'G') { printc(padd(map_pos, prev), ch, COLOR_GARAGE); }
 			else if (ch == 'C') { printc(padd(map_pos, prev), 'B', COLOR_BARRACKS); }
 			else if (ch == 'S') { printc(padd(map_pos, prev), ch, COLOR_SHELTER); }
+			else if (ch == 'E') { printc(padd(map_pos, prev), 'S', COLOR_USER_SOLDIER); }
+			else if (ch == 'F') { printc(padd(map_pos, prev), ch, COLOR_USER_FREMEN); }
 			else if (ch == '#') { printc(padd(map_pos, prev), ch, COLOR_DEFAULT); }
+			
 			else { printc(padd(map_pos, prev), ch, COLOR_OTHER); }
 		}
 
@@ -176,6 +185,7 @@ void display_cursor(CURSOR cursor) {
 			else if (ch == 'X') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
 			else if (ch == 'Y') { printc(padd(map_pos, curr), 'H', COLOR_CURSOR); }
 			else if (ch == 'C') { printc(padd(map_pos, curr), 'B', COLOR_CURSOR); }
+			else if (ch == 'E') { printc(padd(map_pos, curr), 'S', COLOR_CURSOR); }
 			else { printc(padd(map_pos, curr), ch, COLOR_CURSOR); }
 		}
 	}

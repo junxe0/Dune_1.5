@@ -109,6 +109,9 @@ KEY get_key(void) {
 	case 'U':
 	case 'u':
 		return k_u;
+	case 'F':
+	case 'f':
+		return k_f;
 	case 224:
 		byte = _getch();  // MSB 224가 입력 되면 1바이트 더 전달 받기
 		switch (byte) {

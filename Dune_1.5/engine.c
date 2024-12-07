@@ -40,7 +40,7 @@ void remove_spice(int index);
 
 // 샌드웜
 double calculate_distance(POSITION a, POSITION b);
-POSITION find_closest_harvestor(POSITION sandworm_pos);
+POSITION find_closest_unit(POSITION sandworm_pos);
 void sandworm_move(void);
 void sandworm2_move(void);
 POSITION sandworm_next_position(void);
@@ -53,6 +53,19 @@ void add_barracks(void);
 void add_dormitory(void);
 void add_garage(void);
 void add_shelter(void);
+
+void add_b_soldier(POSITION s_pos);
+void remove_b_soldier(int index);
+int get_bsoldier_index(POSITION pos);
+void bsoldier_set_dest(POSITION soldier_pos, POSITION dest_pos);
+void bsoldier_move(void);
+void bsoldier_set_patrol(POSITION* soldier_pos, POSITION* patrol_pos);
+
+void add_b_fremen(POSITION f_pos);
+int get_bfremen_index(POSITION pos);
+void bfremen_set_dest(POSITION fremen_pos, POSITION dest_pos);
+void bfremen_move(void);
+void bfremen_set_patrol(POSITION* fremen_pos, POSITION* patrol_pos);
 
 /* ================= control =================== */
 int sys_clock = 0;		// system-wide clock(ms)
@@ -142,26 +155,27 @@ int garage_count = 0;
 int barracks_pos[][2] = { 0 };
 int barracks_count = 0;
 
-// 보병
-int soldier_count = 0;
-
 // 은신처
 int shelter_pos[][2] = { 0 };
 int shelter_count = 0;
 
+// 보병
+SOLDIER soldiers[MAX_SOLDIER];
+int soldier_count = 0;
+
 // 프레멘
+FREMEN fremens[MAX_FREMEN];
 int fremen_count = 0;
 
 // 명령어
-char command_key[100] = { 0 };
+char command_key[100] = "None";
 int build_key = 0;
-int unit_key = 0;
 
 /* ================= 구조체 =================== */
 RESOURCE resource = { 
 	// 스파이스
-	.spice = 5,
-	.spice_max = 10,
+	.spice = 100,
+	.spice_max = 200,
 	// 인구
 	.population = 0,
 	.population_max = 0
@@ -175,7 +189,7 @@ SANDWORM sandworm1 = {
 	 // 문자
 	.repr = 'W',
 	// 이동
-	.speed = 2500,
+	.speed = 250000,
 	.next_move_time = 2500,
 	// 공격
 	.next_attack_time = 10000,
@@ -193,7 +207,7 @@ SANDWORM sandworm2 = {
 	// 문자
 	.repr = 'W',
 	// 이동
-	.speed = 2500,
+	.speed = 250000,
 	.next_move_time = 2500,
 	// 공격
 	.next_attack_time = 10000,
@@ -272,11 +286,30 @@ int main(void) {
 				bharvestor_set_dest(select_pos, cursor.current[0]);
 				strcpy_s(command_key, 50, "None");
 			}
-			else if (build_key < 1 && unit_key < 1) { 
+			else if (strcmp(command_key, "soldier_move") == 0) {
+				sys_msg_print("보병이 목적지로 이동합니다.");
+				bsoldier_set_dest(select_pos, cursor.current[0]);
+				strcpy_s(command_key, 50, "None");
+			}
+			else if (strcmp(command_key, "soldier_patrol") == 0) {
+				sys_msg_print("보병이 목적지로 순찰을 목적으로 이동합니다.");
+				bsoldier_set_patrol(&select_pos, &cursor.current[0]);
+				strcpy_s(command_key, 50, "None");
+			}
+			else if (strcmp(command_key, "fremen_move") == 0) {
+				sys_msg_print("프레멘이 목적지로 이동합니다.");
+				bfremen_set_dest(select_pos, cursor.current[0]);
+				strcpy_s(command_key, 50, "None");
+			}
+			else if (strcmp(command_key, "fremen_patrol") == 0) {
+				sys_msg_print("프레멘이 목적지로 순찰을 목적으로 이동합니다.");
+				bfremen_set_patrol(&select_pos, &cursor.current[0]);
+				strcpy_s(command_key, 50, "None");
+			}
+			else if (build_key < 1 && strcmp(command_key, "None") == 0) {
 				get_info(cursor.current[0]);
 				select_pos = cursor.current[0];
 			}
-			build_key = 0;
 		}
 		else if (key == k_h) {
 			if (strcmp(command_key, "select_harvestor") == 0) {
@@ -312,9 +345,9 @@ int main(void) {
 			}
 		}
 		else if (key == k_b) {
-			clear_info();
-			clear_command();
-			if (strcmp(command_key, "None") == 0 && build_key == 0 && unit_key == 0) {
+			if (strcmp(command_key, "None") == 0 && build_key == 0) {
+				clear_info();
+				clear_command();
 				build_key = 1;
 				sys_msg_print("건설 가능한 건물 목록을 불러옵니다.");
 				command_print("건설 가능한 건물 목록", 1);
@@ -322,6 +355,8 @@ int main(void) {
 				command_print("병영 : B, 은신처 : S", 3);
 			}
 			else if (strcmp(command_key, "None") == 0 && build_key == 1) {
+				clear_info();
+				clear_command();
 				build_key = 2;
 				sys_msg_print("병영 건설을 선택하셨습니다.");
 			}
@@ -331,6 +366,14 @@ int main(void) {
 				build_key = 3;
 				clear_command();
 				sys_msg_print("장판 건설을 선택하셨습니다.");
+			}
+			else if (strcmp(command_key, "select_soldier") == 0) {
+				sys_msg_print("보병이 순찰 할 곳을 선택해주세요.");
+				strcpy_s(command_key, 50, "soldier_patrol");
+			}
+			else if (strcmp(command_key, "select_fremen") == 0) {
+				sys_msg_print("프레멘이 순찰 할 곳을 선택해주세요.");
+				strcpy_s(command_key, 50, "fremen_patrol");
 			}
 		}
 		else if (key == k_d) {
@@ -353,16 +396,52 @@ int main(void) {
 				clear_command();
 				sys_msg_print("은신처 건설을 선택하셨습니다.");
 			}
+			else if (strcmp(command_key, "select_barracks") == 0) {
+				if (1 <= resource.spice) {
+					int soldier_row = select_pos.row;
+					int soldier_column = select_pos.column;
+					if (soldier_row > 1 && map[0][soldier_row - 1][soldier_column] == 'C') { soldier_row -= 1; }
+					if (soldier_column > 1 && map[0][soldier_row][soldier_column - 1] == 'C') { soldier_column -= 1; }
+					POSITION soldier_pos = { soldier_row - 1, soldier_column };
+					if (soldier_pos.row > 0 && map[1][soldier_pos.row][soldier_pos.column] == 'E') { sys_msg_print("이미 해당 자리에 보병이 있습니다."); }
+					else {
+						add_b_soldier(soldier_pos);
+						sys_msg_print("새로운 보병이 준비되었습니다.");
+						resource.spice -= 1;
+					}
+				}
+				else { sys_msg_print("스파이스가 충분하지 않습니다."); }
+				strcpy_s(command_key, 50, "None");
+			}
 		}
 		else if (key == k_u) {
 			if (strcmp(command_key, "None") == 0 && build_key == 0) {
-				unit_key = 1;
+				strcpy_s(command_key, 50, "show_unit");
 				clear_command();
 				sys_msg_print("유닛 목록을 불러옵니다.");
 				info_print("유닛 목록", 1);
 				info_print_num("하베스터 : ", bharvestor_count, 2);
 				info_print_num("보병 : ", soldier_count, 3);
 				info_print_num("프레멘 : ", fremen_count, 4);
+			}
+		}
+		else if (key == k_f) {
+			if (strcmp(command_key, "select_shelter") == 0) {
+				if (5 <= resource.spice) {
+					int fremen_row = select_pos.row;
+					int fremen_column = select_pos.column;
+					if (fremen_row > 1 && map[0][fremen_row - 1][fremen_column] == 'S') { fremen_row -= 1; }
+					if (fremen_column > 1 && map[0][fremen_row][fremen_column - 1] == 'S') { fremen_column -= 1; }
+					POSITION fremen_pos = { fremen_row - 1, fremen_column };
+					if (fremen_pos.row > 0 && map[1][fremen_pos.row][fremen_pos.column] == 'F') { sys_msg_print("이미 해당 자리에 프레멘이 있습니다."); }
+					else {
+						add_b_fremen(fremen_pos);
+						sys_msg_print("새로운 프레멘이 준비되었습니다.");
+						resource.spice -= 5;
+					}
+				}
+				else { sys_msg_print("스파이스가 충분하지 않습니다."); }
+				strcpy_s(command_key, 50, "None");
 			}
 		}
 		else if (key == k_esc) {
@@ -379,7 +458,7 @@ int main(void) {
 			else if (build_key == 4) { sys_msg_print("숙소 건설 선택을 취소하셨습니다."); }
 			else if (build_key == 5) { sys_msg_print("창고 건설 선택을 취소하셨습니다."); }
 			else if (build_key == 6) { sys_msg_print("은신처 건설 선택을 취소하셨습니다."); }
-			strcpy_s(command_key, 50, "None"), build_key = 0, unit_key = 0;
+			strcpy_s(command_key, 50, "None"), build_key = 0;
 		}
 		else {
 			switch (key) {
@@ -394,6 +473,12 @@ int main(void) {
 
 		// 하베스터 이동
 		bharvestor_move();
+
+		// 보병 이동
+		bsoldier_move();
+		
+		// 프레멘 이동
+		bfremen_move();
 
 		// 샌드웜 이동
 		sandworm_move();
@@ -424,8 +509,14 @@ void get_info(POSITION pos) {
 		case 'Y':
 			print_get_info(pos, ch1);
 			break;
+		case 'E':
+			print_get_info(pos, ch1);
+			break;
+		case 'F':
+			print_get_info(pos, ch1);
+			break;
 		default:
-			print_get_info(pos, ch0);
+			print_get_info(pos, ch1);
 			break;
 		}
 		break;
@@ -456,12 +547,6 @@ void get_info(POSITION pos) {
 		print_get_info(pos, ch0);
 		break;
 	case 'S':
-		print_get_info(pos, ch0);
-		break;
-	case 'E':
-		print_get_info(pos, ch0);
-		break;
-	case 'F':
 		print_get_info(pos, ch0);
 		break;
 	default:
@@ -550,6 +635,7 @@ void print_get_info(POSITION pos, char ch) {
 		info_print("건설 비용 : 4", 3);
 		info_print("내구도 : 20", 4);
 		command_print("명령어 : S ( 보병 생산 )", 1);
+		strcpy_s(command_key, 50, "select_barracks");
 	}
 	else if (ch == 'S') {
 		sys_msg_print("은신처를 선택하셨습니다.");
@@ -558,6 +644,7 @@ void print_get_info(POSITION pos, char ch) {
 		info_print("건설 비용 : 5", 3);
 		info_print("내구도 : 30", 4);
 		command_print("명령어 : F ( 프레멘 생산 )", 1);
+		strcpy_s(command_key, 50, "select_shelter");
 	}
 	else if (ch == 'E') {
 		sys_msg_print("보병을 선택하셨습니다.");
@@ -1037,24 +1124,24 @@ void bharvestor_move(void) {
 
 				if (abs(diff.row) >= abs(diff.column)) {
 					if (diff.row > 0) {
-						new_row++;
+						new_row++; // 아래
 					}
 					else if (diff.row < 0) {
-						new_row--;
+						new_row--; // 위
 					}
 				}
 				else {
 					if (diff.column > 0) {
-						new_column++;
+						new_column++; // 오른쪽
 					}
 					else if (diff.column < 0) {
-						new_column--;
+						new_column--; // 왼쪽
 					}
 				}
 
 				// 이동하려는 칸에 다른 하베스터가 있는지 확인
-				if (map[1][new_row][new_column] == 'X') {
-					sys_msg_print("이동하려는 칸에 하베스터가 있으므로 대기합니다.");
+				if (map[1][new_row][new_column] == 'E' || map[1][new_row][new_column] == 'F' || map[1][new_row][new_column] == 'X') {
+					sys_msg_print("이동하려는 칸에 유닛이 있으므로 대기합니다.");
 					harvestor->next_move_time = sys_clock + harvestor->speed;
 					continue;
 				}
@@ -1215,31 +1302,41 @@ double calculate_distance(POSITION a, POSITION b) {
 	return sqrt(pow(a.row - b.row, 2) + pow(a.column - b.column, 2));
 }
 
-POSITION find_closest_harvestor(POSITION sandworm_pos) {
+POSITION find_closest_unit(POSITION sandworm_pos) {
 	double min_distance = INFINITY;
-	POSITION closest_harvestor = { -1, -1 };
+	POSITION closest_unit = { -1, -1 };
 
-	// 아군 하베스터 찾기
+	// 아군 하베스터
 	for (int i = 0; i < bharvestor_count; i++) {
-		HARVESTOR h = bharvestors[i];
-		double distance = calculate_distance(sandworm_pos, h.pos);
+		HARVESTOR havestor = bharvestors[i];
+		double distance = calculate_distance(sandworm_pos, havestor.pos);
 		if (distance < min_distance) {
 			min_distance = distance;
-			closest_harvestor = h.pos;
+			closest_unit = havestor.pos;
 		}
 	}
 
-	// 적군 하베스터 찾기
+	// 적군 하베스터
 	for (int i = 0; i < rharvestor_count; i++) {
-		HARVESTOR h = rharvestors[i];
-		double distance = calculate_distance(sandworm_pos, h.pos);
+		HARVESTOR havestor = rharvestors[i];
+		double distance = calculate_distance(sandworm_pos, havestor.pos);
 		if (distance < min_distance) {
 			min_distance = distance;
-			closest_harvestor = h.pos;
+			closest_unit = havestor.pos;
 		}
 	}
 
-	return closest_harvestor;
+	// 보병
+	for (int i = 0; i < soldier_count; i++) {
+		SOLDIER soldier = soldiers[i];
+		double distance = calculate_distance(sandworm_pos, soldier.pos);
+		if (distance < min_distance) {
+			min_distance = distance;
+			closest_unit = soldier.pos;
+		}
+	}
+
+	return closest_unit;
 }
 
 POSITION sandworm_next_position(void) {
@@ -1249,7 +1346,7 @@ POSITION sandworm_next_position(void) {
 	// 목적지 도착 처리
 	if (diff.row == 0 && diff.column == 0) {
         // 도착 시 가장 가까운 하베스터를 다시 찾음
-        sandworm1.dest = find_closest_harvestor(sandworm1.pos);
+        sandworm1.dest = find_closest_unit(sandworm1.pos);
         // 새로운 목적지 찾기가 실패할 경우 현재 위치를 반환
         if (sandworm1.dest.row == -1 && sandworm1.dest.column == -1) {
             return sandworm1.pos; // 이동하지 않음
@@ -1304,34 +1401,29 @@ POSITION sandworm_next_position(void) {
 
 void sandworm_move(void) {
 	if (sys_clock < sandworm1.next_move_time) {
-		return; // 아직 이동할 시간이 아님
+		return;
 	}
 
-	POSITION next_pos = sandworm_next_position(); // 다음 위치 계산
+	POSITION next_pos = sandworm_next_position();
 	if (sys_clock < sandworm1.last_attack_time + sandworm1.next_attack_time &&
 		(map[1][next_pos.row][next_pos.column] == 'X' || map[1][next_pos.row][next_pos.column] == 'Y')) {
-		return; // 공격 대기 중
+		return;
 	}
 
-	// 가장 가까운 하베스터를 찾고 목적지 설정
-	POSITION closest_harvestor = find_closest_harvestor(sandworm1.pos);
-	if (closest_harvestor.row != -1 && closest_harvestor.column != -1) {
-		sandworm1.dest = closest_harvestor; // 새로운 목적지 업데이트
+	POSITION closest_unit = find_closest_unit(sandworm1.pos);
+	if (closest_unit.row != -1 && closest_unit.column != -1) {
+		sandworm1.dest = closest_unit;
 
-		// 이전 위치를 맵에서 지우기
-		map[1][sandworm1.pos.row][sandworm1.pos.column] = -1; // 현재 위치 지우기
+		map[1][sandworm1.pos.row][sandworm1.pos.column] = -1;
 
-		// 이동할 위치에서 하베스터를 잡아먹기
 		if (map[1][next_pos.row][next_pos.column] == 'X' &&
 			sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
-			// 아군 하베스터를 잡아먹음
-			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
+			map[1][next_pos.row][next_pos.column] = -1;
 
-			// 하베스터 구조체 배열에서 해당 하베스터 삭제
 			for (int i = 0; i < bharvestor_count; i++) {
 				if (bharvestors[i].pos.row == next_pos.row && bharvestors[i].pos.column == next_pos.column) {
-					remove_b_harvestor(i); // 배열에서 삭제
-					break; // 삭제 후 루프 종료
+					remove_b_harvestor(i);
+					break;
 				}
 			}
 
@@ -1339,55 +1431,67 @@ void sandworm_move(void) {
 			sandworm1.last_attack_time = sys_clock;
 
 			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
-			closest_harvestor = find_closest_harvestor(sandworm1.pos);
-			if (closest_harvestor.row != -1 && closest_harvestor.column != -1) {
-				sandworm1.dest = closest_harvestor; // 새로운 목적지로 업데이트
+			closest_unit = find_closest_unit(sandworm1.pos);
+			if (closest_unit.row != -1 && closest_unit.column != -1) {
+				sandworm1.dest = closest_unit; // 새로운 목적지로 업데이트
 			}
 		}
 		else if (map[1][next_pos.row][next_pos.column] == 'Y' &&
 			sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
-			// 적군 하베스터를 잡아먹음
-			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
+			map[1][next_pos.row][next_pos.column] = -1;
 
-			// 하베스터 구조체 배열에서 해당 하베스터 삭제
 			for (int i = 0; i < rharvestor_count; i++) {
 				if (rharvestors[i].pos.row == next_pos.row && rharvestors[i].pos.column == next_pos.column) {
-					remove_r_harvestor(i); // 배열에서 삭제
-					break; // 삭제 후 루프 종료
+					remove_r_harvestor(i);
+					break;
 				}
 			}
 
 			sys_msg_print("샌드웜이 적군 하베스터를 잡아먹었습니다.");
 			sandworm1.last_attack_time = sys_clock;
 
-			// 하베스터를 잡아먹은 후 새로운 하베스터를 다시 찾기
-			closest_harvestor = find_closest_harvestor(sandworm1.pos);
-			if (closest_harvestor.row != -1 && closest_harvestor.column != -1) {
-				sandworm1.dest = closest_harvestor; // 새로운 목적지로 업데이트
+			closest_unit = find_closest_unit(sandworm1.pos);
+			if (closest_unit.row != -1 && closest_unit.column != -1) {
+				sandworm1.dest = closest_unit;
+			}
+		}
+		else if (map[1][next_pos.row][next_pos.column] == 'E' &&
+			sandworm1.last_attack_time + sandworm1.next_attack_time <= sys_clock) {
+			map[1][next_pos.row][next_pos.column] = -1;
+
+			for (int i = 0; i < soldier_count; i++) {
+				if (soldiers[i].pos.row == next_pos.row && soldiers[i].pos.column == next_pos.column) {
+					remove_b_soldier(i);
+					break;
+				}
+			}
+
+			sys_msg_print("샌드웜이 아군 보병을 잡아먹었습니다.");
+			sandworm1.last_attack_time = sys_clock;
+
+			closest_unit = find_closest_unit(sandworm1.pos);
+			if (closest_unit.row != -1 && closest_unit.column != -1) {
+				sandworm1.dest = closest_unit;
 			}
 		}
 
-		// 위치 업데이트
-		sandworm1.pos = next_pos; // 이동 후 위치 업데이트
-		map[1][sandworm1.pos.row][sandworm1.pos.column] = sandworm1.repr; // 새 위치에 'W' 출력
+		sandworm1.pos = next_pos;
+		map[1][sandworm1.pos.row][sandworm1.pos.column] = sandworm1.repr;
 	}
 	else {
-		// 하베스터가 없을 경우 멈춤
-		// 현재 위치를 유지하므로 아무것도 하지 않음
-		return; // 여기서 함수 종료하여 아무것도 하지 않음
+		return;
 	}
 
-	// 스파이스 배설 처리
 	if (sys_clock >= sandworm1.next_defecation_time) {
-		POSITION build_pos = sandworm1.pos; // 현재 위치에 스파이스 생성
+		POSITION build_pos = sandworm1.pos;
 		if (map[0][build_pos.row][build_pos.column] == ' ' || map[0][build_pos.row][build_pos.column] == -1) {
-			create_spice(build_pos); // 현재 위치에 스파이스 생성
+			create_spice(build_pos);
 		}
-		int defecation_interval = rand() % 10001 + 5000; // 5초 ~ 15초
-		sandworm1.next_defecation_time = sys_clock + defecation_interval; // 다음 배설 시간 설정
+		int defecation_interval = rand() % 10001 + 5000;
+		sandworm1.next_defecation_time = sys_clock + defecation_interval;
 	}
 
-	sandworm1.next_move_time = sys_clock + sandworm1.speed; // 다음 이동 시간 설정
+	sandworm1.next_move_time = sys_clock + sandworm1.speed;
 }
 
 POSITION sandworm2_next_position(void) {
@@ -1397,7 +1501,7 @@ POSITION sandworm2_next_position(void) {
 	// 목적지 도착 처리
 	if (diff.row == 0 && diff.column == 0) {
 		// 도착 시 가장 가까운 하베스터를 다시 찾음
-		sandworm2.dest = find_closest_harvestor(sandworm2.pos);
+		sandworm2.dest = find_closest_unit(sandworm2.pos);
 		// 새로운 목적지 찾기가 실패할 경우 현재 위치를 반환
 		if (sandworm2.dest.row == -1 && sandworm2.dest.column == -1) {
 			return sandworm2.pos; // 이동하지 않음
@@ -1452,77 +1556,97 @@ POSITION sandworm2_next_position(void) {
 
 void sandworm2_move(void) {
 	if (sys_clock < sandworm2.next_move_time) {
-		return; // 아직 이동할 시간이 아님
+		return;
 	}
 
-	POSITION next_pos = sandworm2_next_position(); // 다음 위치 계산
+	POSITION next_pos = sandworm2_next_position();
 	if (sys_clock < sandworm2.last_attack_time + sandworm2.next_attack_time &&
 		(map[1][next_pos.row][next_pos.column] == 'X' || map[1][next_pos.row][next_pos.column] == 'Y')) {
-		return; // 공격 대기 중
+		return;
 	}
 
 	// 가장 가까운 하베스터를 찾고 목적지 설정
-	POSITION closest_harvestor = find_closest_harvestor(sandworm2.pos);
-	if (closest_harvestor.row != -1 && closest_harvestor.column != -1) {
-		sandworm2.dest = closest_harvestor; // 새로운 목적지 업데이트
+	POSITION closest_unit = find_closest_unit(sandworm2.pos);
+	if (closest_unit.row != -1 && closest_unit.column != -1) {
+		sandworm2.dest = closest_unit;
 
-		// 이전 위치를 맵에서 지우기
-		map[1][sandworm2.pos.row][sandworm2.pos.column] = -1; // 현재 위치 지우기
+		map[1][sandworm2.pos.row][sandworm2.pos.column] = -1;
 
-		// 이동할 위치에서 하베스터를 잡아먹기
 		if (map[1][next_pos.row][next_pos.column] == 'X' &&
 			sandworm2.last_attack_time + sandworm2.next_attack_time <= sys_clock) {
-			// 아군 하베스터를 잡아먹음
-			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
+			map[1][next_pos.row][next_pos.column] = -1;
 
-			// 하베스터 구조체 배열에서 해당 하베스터 삭제
 			for (int i = 0; i < bharvestor_count; i++) {
 				if (bharvestors[i].pos.row == next_pos.row && bharvestors[i].pos.column == next_pos.column) {
-					remove_b_harvestor(i); // 배열에서 삭제
-					break; // 삭제 후 루프 종료
+					remove_b_harvestor(i);
+					break;
 				}
 			}
 
 			sys_msg_print("샌드웜이 아군 하베스터를 잡아먹었습니다.");
 			sandworm2.last_attack_time = sys_clock;
+
+			closest_unit = find_closest_unit(sandworm2.pos);
+			if (closest_unit.row != -1 && closest_unit.column != -1) {
+				sandworm2.dest = closest_unit;
+			}
 		}
 		else if (map[1][next_pos.row][next_pos.column] == 'Y' &&
 			sandworm2.last_attack_time + sandworm2.next_attack_time <= sys_clock) {
-			// 적군 하베스터를 잡아먹음
-			map[1][next_pos.row][next_pos.column] = -1; // 맵에서도 삭제
+			map[1][next_pos.row][next_pos.column] = -1;
 
-			// 하베스터 구조체 배열에서 해당 하베스터 삭제
 			for (int i = 0; i < rharvestor_count; i++) {
 				if (rharvestors[i].pos.row == next_pos.row && rharvestors[i].pos.column == next_pos.column) {
-					remove_r_harvestor(i); // 배열에서 삭제
-					break; // 삭제 후 루프 종료
+					remove_r_harvestor(i);
+					break;
 				}
 			}
 
 			sys_msg_print("샌드웜이 적군 하베스터를 잡아먹었습니다.");
 			sandworm2.last_attack_time = sys_clock;
+
+			closest_unit = find_closest_unit(sandworm2.pos);
+			if (closest_unit.row != -1 && closest_unit.column != -1) {
+				sandworm2.dest = closest_unit;
+			}
+		}
+		else if (map[1][next_pos.row][next_pos.column] == 'E' &&
+			sandworm2.last_attack_time + sandworm2.next_attack_time <= sys_clock) {
+			map[1][next_pos.row][next_pos.column] = -1;
+
+			for (int i = 0; i < soldier_count; i++) {
+				if (soldiers[i].pos.row == next_pos.row && soldiers[i].pos.column == next_pos.column) {
+					remove_b_soldier(i);
+					break;
+				}
+			}
+
+			sys_msg_print("샌드웜이 아군 보병을 잡아먹었습니다.");
+			sandworm2.last_attack_time = sys_clock;
+
+			closest_unit = find_closest_unit(sandworm2.pos);
+			if (closest_unit.row != -1 && closest_unit.column != -1) {
+				sandworm2.dest = closest_unit;
+			}
 		}
 
-		// 위치 업데이트
-		sandworm2.pos = next_pos; // 이동 후 위치 업데이트
-		map[1][sandworm2.pos.row][sandworm2.pos.column] = sandworm2.repr; // 새 위치에 'W' 출력
+		sandworm2.pos = next_pos;
+		map[1][sandworm2.pos.row][sandworm2.pos.column] = sandworm2.repr;
 	}
 	else {
-		// 하베스터가 없을 경우 멈춤
-		return; // 여기서 함수 종료하여 아무것도 하지 않음
+		return;
 	}
 
-	// 스파이스 배설 처리
 	if (sys_clock >= sandworm2.next_defecation_time) {
-		POSITION build_pos = sandworm2.pos; // 현재 위치에 스파이스 생성
+		POSITION build_pos = sandworm2.pos;
 		if (map[0][build_pos.row][build_pos.column] == ' ' || map[0][build_pos.row][build_pos.column] == -1) {
-			create_spice(build_pos); // 현재 위치에 스파이스 생성
+			create_spice(build_pos);
 		}
-		int defecation_interval = rand() % 10001 + 5000; // 5초 ~ 15초
-		sandworm2.next_defecation_time = sys_clock + defecation_interval; // 다음 배설 시간 설정
+		int defecation_interval = rand() % 10001 + 5000;
+		sandworm2.next_defecation_time = sys_clock + defecation_interval;
 	}
 
-	sandworm2.next_move_time = sys_clock + sandworm2.speed; // 다음 이동 시간 설정
+	sandworm2.next_move_time = sys_clock + sandworm2.speed;
 }
 
 /* ========================== 건설 ============================ */
@@ -1808,4 +1932,281 @@ void add_shelter(void) {
 		sys_msg_print("보유 중인 스파이스가 5 보다 적습니다.");
 	}
 	build_key = 0;
+}
+
+/* ================= 보병 =================== */
+void add_b_soldier(POSITION s_pos) {
+	if (soldier_count < MAX_SOLDIER) {
+		soldiers[soldier_count].pos.row = s_pos.row;
+		soldiers[soldier_count].pos.column = s_pos.column;
+		soldiers[soldier_count].hp = 20;
+
+		strcpy_s(soldiers[soldier_count].active, 50, "stop");
+		soldiers[soldier_count].next_move_time = 0;
+		soldiers[soldier_count].speed = 1000;
+
+		soldiers[soldier_count].atk = 5;
+		soldiers[soldier_count].attack_speed = 800;
+		soldiers[soldier_count].next_attack_time = 0;
+		soldier_count++;
+
+		map[1][s_pos.row][s_pos.column] = 'E';
+	}
+}
+
+void remove_b_soldier(int index) {
+	if (index < 0 || index >= soldier_count) {
+		return;
+	}
+
+	// 하베스터 배열에서 해당 인덱스의 하베스터를 삭제
+	for (int i = index; i < soldier_count - 1; i++) {
+		soldiers[i] = soldiers[i + 1];
+	}
+
+	soldier_count--; // 하베스터 수 감소
+
+	// 마지막 요소를 초기화 (선택 사항)
+	soldiers[soldier_count].hp = -1; // 체력을 -1로 초기화
+}
+
+int get_bsoldier_index(POSITION pos) {
+	for (int i = 0; i < soldier_count; i++) {
+		if (soldiers[i].pos.row == pos.row && soldiers[i].pos.column == pos.column) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void bsoldier_set_patrol(POSITION* soldier_pos, POSITION* patrol_pos) {
+	int index = get_bsoldier_index(*soldier_pos);
+	if (index != -1) {
+		soldiers[index].first_pos = *soldier_pos;
+		soldiers[index].patrol_pos = *patrol_pos;
+		strcpy_s(soldiers[index].patrol, 50, "patrol");
+		bsoldier_set_dest(soldiers[index].pos, *patrol_pos);
+	}
+}
+
+void bsoldier_set_dest(POSITION soldier_pos, POSITION dest_pos) {
+	int index = get_bsoldier_index(soldier_pos);
+	if (index != -1) {
+		if ((0 < dest_pos.row && 0 < dest_pos.column) &&
+			(dest_pos.row != soldiers[index].pos.row || dest_pos.column != soldiers[index].pos.column)) {
+			soldiers[index].dest = dest_pos;
+			strcpy_s(soldiers[index].active, 50, "move");
+			bsoldier_move();
+		}
+	}
+	else {
+		return; // 하베스터가 존재하지 않음
+	}
+}
+
+void bsoldier_move(void) {
+	for (int i = 0; i < soldier_count; i++) {
+		SOLDIER* soldier = &soldiers[i];
+
+		if (strcmp(soldier->active, "stop") == 0 &&
+			strcmp(soldier->patrol, "patrol") == 0 &&
+			soldier->pos.row == soldier->patrol_pos.row &&
+			soldier->pos.column == soldier->patrol_pos.column) {
+			if (sys_clock >= soldier->next_move_time) {
+				sys_msg_print("보병이 본진을 목적지로 이동합니다.");
+				strcpy_s(soldier->active, 50, "move");
+
+				bsoldier_set_dest(soldier->pos, soldier->first_pos);
+			}
+		}
+
+		if (strcmp(soldier->active, "stop") == 0 &&
+			strcmp(soldier->patrol, "patrol") == 0 &&
+			soldier->pos.row == soldier->first_pos.row &&
+			soldier->pos.column == soldier->first_pos.column) {
+			if (sys_clock >= soldier->next_move_time) {
+				sys_msg_print("보병이 순찰지를 목적지로 이동합니다.");
+				strcpy_s(soldier->active, 50, "move");
+
+				bsoldier_set_dest(soldier->pos, soldier->patrol_pos);
+			}
+		}
+
+		if (strcmp(soldier->active, "move") == 0) {
+			if (sys_clock >= soldier->next_move_time) {
+				POSITION diff = psub(soldier->dest, soldier->pos);
+
+				int new_row = soldier->pos.row;
+				int new_column = soldier->pos.column;
+
+				if (abs(diff.row) >= abs(diff.column)) {
+					if (diff.row > 0) {
+						new_row++; // 아래
+					}
+					else if (diff.row < 0) {
+						new_row--; // 위
+					}
+				}
+				else {
+					if (diff.column > 0) {
+						new_column++; // 오른쪽
+					}
+					else if (diff.column < 0) {
+						new_column--; // 왼쪽
+					}
+				}
+
+				if (map[1][new_row][new_column] == 'E' || map[1][new_row][new_column] == 'F' || map[1][new_row][new_column] == 'X') {
+					sys_msg_print("이동하려는 칸에 유닛이 있으므로 대기합니다.");
+					soldier->next_move_time = sys_clock + soldier->speed;
+					continue;
+				}
+				else {
+					map[1][soldier->pos.row][soldier->pos.column] = -1;
+
+					soldier->pos.row = new_row;
+					soldier->pos.column = new_column;
+					map[1][soldier->pos.row][soldier->pos.column] = 'E';
+
+					soldier->next_move_time = sys_clock + soldier->speed;
+
+					if (soldier->pos.row == soldier->dest.row && soldier->pos.column == soldier->dest.column) {
+						sys_msg_print("보병이 목적지에 도착했습니다.");
+						strcpy_s(soldier->active, 50, "stop");
+					}
+				}
+			}
+		}
+	}
+}
+
+/* ================= 프레멘 =================== */
+void add_b_fremen(POSITION f_pos) {
+	if (fremen_count < MAX_FREMEN) {
+		fremens[fremen_count].pos.row = f_pos.row;
+		fremens[fremen_count].pos.column = f_pos.column;
+		fremens[fremen_count].hp = 20;
+
+		strcpy_s(fremens[fremen_count].patrol, 50, "None");
+		strcpy_s(fremens[fremen_count].active, 50, "stop");
+		fremens[fremen_count].next_move_time = 0;
+		fremens[fremen_count].speed = 1000;
+
+		fremens[fremen_count].atk = 5;
+		fremens[fremen_count].attack_speed = 800;
+		fremens[fremen_count].next_attack_time = 0;
+		fremen_count++;
+
+		map[1][f_pos.row][f_pos.column] = 'F';
+	}
+}
+
+int get_bfremen_index(POSITION pos) {
+	for (int i = 0; i < fremen_count; i++) {
+		if (fremens[i].pos.row == pos.row && fremens[i].pos.column == pos.column) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void bfremen_set_patrol(POSITION* fremen_pos, POSITION* patrol_pos) {
+	int index = get_bfremen_index(*fremen_pos);
+	if (index != -1) {
+		fremens[index].first_pos = *fremen_pos;
+		fremens[index].patrol_pos = *patrol_pos;
+		strcpy_s(fremens[index].patrol, 50, "patrol");
+		bfremen_set_dest(fremens[index].pos, *patrol_pos);
+	}
+}
+
+void bfremen_set_dest(POSITION fremen_pos, POSITION dest_pos) {
+	int index = get_bfremen_index(fremen_pos);
+	if (index != -1) {
+		if ((0 < dest_pos.row && 0 < dest_pos.column) &&
+			(dest_pos.row != fremens[index].pos.row || dest_pos.column != fremens[index].pos.column)) {
+			fremens[index].dest = dest_pos;
+			strcpy_s(fremens[index].active, 50, "move");
+			bfremen_move();
+		}
+	}
+	else {
+		return; // 하베스터가 존재하지 않음
+	}
+}
+
+void bfremen_move(void) {
+	for (int i = 0; i < fremen_count; i++) {
+		FREMEN* fremen = &fremens[i];
+
+		if (strcmp(fremen->active, "stop") == 0 &&
+			strcmp(fremen->patrol, "patrol") == 0 &&
+			fremen->pos.row == fremen->patrol_pos.row &&
+			fremen->pos.column == fremen->patrol_pos.column) {
+			if (sys_clock >= fremen->next_move_time) {
+				sys_msg_print("프레멘이 본진을 목적지로 이동합니다.");
+				strcpy_s(fremen->active, 50, "move");
+
+				bfremen_set_dest(fremen->pos, fremen->first_pos);
+			}
+		}
+
+		if (strcmp(fremen->active, "stop") == 0 &&
+			strcmp(fremen->patrol, "patrol") == 0 &&
+			fremen->pos.row == fremen->first_pos.row &&
+			fremen->pos.column == fremen->first_pos.column) {
+			if (sys_clock >= fremen->next_move_time) {
+				sys_msg_print("프레멘이 순찰지를 목적지로 이동합니다.");
+				strcpy_s(fremen->active, 50, "move");
+
+				bfremen_set_dest(fremen->pos, fremen->patrol_pos);
+			}
+		}
+
+		if (strcmp(fremen->active, "move") == 0) {
+			if (sys_clock >= fremen->next_move_time) {
+				POSITION diff = psub(fremen->dest, fremen->pos);
+
+				int new_row = fremen->pos.row;
+				int new_column = fremen->pos.column;
+
+				if (abs(diff.row) >= abs(diff.column)) {
+					if (diff.row > 0) {
+						new_row++; // 아래
+					}
+					else if (diff.row < 0) {
+						new_row--; // 위
+					}
+				}
+				else {
+					if (diff.column > 0) {
+						new_column++; // 오른쪽
+					}
+					else if (diff.column < 0) {
+						new_column--; // 왼쪽
+					}
+				}
+
+				if (map[1][new_row][new_column] == 'E' || map[1][new_row][new_column] == 'F' || map[1][new_row][new_column] == 'X') {
+					sys_msg_print("이동하려는 칸에 유닛이 있으므로 대기합니다.");
+					fremen->next_move_time = sys_clock + fremen->speed;
+					continue;
+				}
+				else {
+					map[1][fremen->pos.row][fremen->pos.column] = -1;
+
+					fremen->pos.row = new_row;
+					fremen->pos.column = new_column;
+					map[1][fremen->pos.row][fremen->pos.column] = 'F';
+
+					fremen->next_move_time = sys_clock + fremen->speed;
+
+					if (fremen->pos.row == fremen->dest.row && fremen->pos.column == fremen->dest.column) {
+						sys_msg_print("프레멘이 목적지에 도착했습니다.");
+						strcpy_s(fremen->active, 50, "stop");
+					}
+				}
+			}
+		}
+	}
 }
